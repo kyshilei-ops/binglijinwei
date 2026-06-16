@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useLang } from "@/lib/LanguageContext";
 import { saveProduct, deleteProduct } from "@/lib/supabaseData";
+import { supabase } from "@/lib/supabase";
 import { MultiImageUploader } from "@/components/ui/MultiImageUploader";
-import { saveImages } from "@/lib/imageStore";
 import { t } from "@/lib/i18n";
 
 interface ProductItem { id: number; name: string; name_en: string; price: number; old_price: number | null; image_url: string; images: string; category: string; category_en: string; badge: string; rating: number; description: string; description_en: string; specs: string; is_featured: boolean; }
