@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { useLang } from "@/lib/LanguageContext";
 import { t } from "@/lib/i18n";
 import { ResolvedImage } from "@/components/ui/ResolvedImage";
+import { supabase } from "@/lib/supabase";
 
 const C = { primary: "#9cc211", primaryBg: "#f4fae6", dark: "#1a202c", body: "#848484", light: "#f7f7f7" };
 
@@ -17,56 +18,19 @@ const defaultFeatures: Feature[] = [
   { icon: "fa-headset", title_zh: "贴心服务", title_en: "Great Support", desc_zh: "7×24小时客户服务，随时为您排忧解难", desc_en: "24/7 customer service, always here to help" },
 ];
 
-function loadFromStorage(key: string, fallback: string): string {
-  if (typeof window === "undefined") return fallback;
-  return localStorage.getItem(key) || fallback;
-}
-
 export default function AboutPage() {
   const { lang } = useLang();
-  const [aboutZh, setAboutZh] = useState("");
-  const [aboutEn, setAboutEn] = useState("");
-  const [aboutImage, setAboutImage] = useState("");
-  const [expYears, setExpYears] = useState("10+");
-  const [expLabelZh, setExpLabelZh] = useState("年行业经验");
-  const [expLabelEn, setExpLabelEn] = useState("Years Experience");
-  const [headingZh, setHeadingZh] = useState("致力于提供最优质的草坪护理解决方案");
-  const [headingEn, setHeadingEn] = useState("Committed to the Best Lawn Care Solutions");
-  const [bannerSubZh, setBannerSubZh] = useState("专业草坪护理与园艺设备");
-  const [bannerSubEn, setBannerSubEn] = useState("Professional Lawn Care & Garden Equipment");
-  const [features, setFeatures] = useState<Feature[]>(defaultFeatures);
+  const [data, setData] = useState<any>({});
 
   useEffect(() => {
-    setAboutZh(loadFromStorage("cms_about_zh", ""));
-    setAboutEn(loadFromStorage("cms_about_en", ""));
-    setAboutImage(loadFromStorage("cms_about_image", ""));
-    setExpYears(loadFromStorage("cms_about_years", "10+"));
-    setExpLabelZh(loadFromStorage("cms_about_years_label_zh", "年行业经验"));
-    setExpLabelEn(loadFromStorage("cms_about_years_label_en", "Years Experience"));
-    setHeadingZh(loadFromStorage("cms_about_heading_zh", "致力于提供最优质的草坪护理解决方案"));
-    setHeadingEn(loadFromStorage("cms_about_heading_en", "Committed to the Best Lawn Care Solutions"));
-    setBannerSubZh(loadFromStorage("cms_about_banner_sub_zh", "专业草坪护理与园艺设备"));
-    setBannerSubEn(loadFromStorage("cms_about_banner_sub_en", "Professional Lawn Care & Garden Equipment"));
-    try { const f = localStorage.getItem("cms_about_features"); if (f) setFeatures(JSON.parse(f)); } catch {}
-    const h = () => {
-      setAboutZh(loadFromStorage("cms_about_zh", ""));
-      setAboutEn(loadFromStorage("cms_about_en", ""));
-      setAboutImage(loadFromStorage("cms_about_image", ""));
-      setExpYears(loadFromStorage("cms_about_years", "10+"));
-      setExpLabelZh(loadFromStorage("cms_about_years_label_zh", "年行业经验"));
-      setExpLabelEn(loadFromStorage("cms_about_years_label_en", "Years Experience"));
-      setHeadingZh(loadFromStorage("cms_about_heading_zh", "致力于提供最优质的草坪护理解决方案"));
-      setHeadingEn(loadFromStorage("cms_about_heading_en", "Committed to the Best Lawn Care Solutions"));
-      setBannerSubZh(loadFromStorage("cms_about_banner_sub_zh", "专业草坪护理与园艺设备"));
-      setBannerSubEn(loadFromStorage("cms_about_banner_sub_en", "Professional Lawn Care & Garden Equipment"));
-      try { const f = localStorage.getItem("cms_about_features"); if (f) setFeatures(JSON.parse(f)); } catch {}
-    };
-    window.addEventListener("storage", h);
-    window.addEventListener("cms-data-changed", h);
-    return () => { window.removeEventListener("storage", h); window.removeEventListener("cms-data-changed", h); };
+    supabase.from("about_content").select("*").limit(1).single().then(({ data: row }: any) => {
+      if (row) setData(row);
+    });
   }, []);
 
-  const aboutText = (lang === "zh" ? aboutZh : (aboutEn || aboutZh)) || "";
+  const aboutText = (lang === "zh" ? (data.content_zh || "") : (data.content_en || data.content_zh || "")) || "";
+  const features: Feature[] = (() => { try { return JSON.parse(data.features_json || "[]"); } catch { return defaultFeatures; } })();
+  if (features.length === 0) features.push(...defaultFeatures);
 
   return (
     <>
@@ -75,7 +39,7 @@ export default function AboutPage() {
         <section className="py-20 text-center" style={{ background: "linear-gradient(to right, #1a202c, #2d3748)" }}>
           <div className="container">
             <h1 className="text-4xl font-bold text-white mb-3">{t("page_about", lang)}</h1>
-            <p className="text-gray-300 max-w-2xl mx-auto">{lang === "zh" ? bannerSubZh : (bannerSubEn || bannerSubZh)}</p>
+            <p className="text-gray-300 max-w-2xl mx-auto">{lang === "zh" ? (data.banner_sub_zh || "专业草坪护理与园艺设备") : (data.banner_sub_en || data.banner_sub_zh || "Professional Lawn Care & Garden Equipment")}</p>
           </div>
         </section>
 
@@ -85,24 +49,22 @@ export default function AboutPage() {
               <div>
                 <p className="text-lg font-medium mb-2" style={{ color: C.primary }}>{t("page_about", lang)}</p>
                 <h2 className="text-3xl font-bold mb-6" style={{ color: C.dark }}>
-                  {lang === "zh" ? headingZh : (headingEn || headingZh)}
+                  {lang === "zh" ? (data.heading_zh || "致力于提供最优质的草坪护理解决方案") : (data.heading_en || data.heading_zh || "Committed to the Best Lawn Care Solutions")}
                 </h2>
                 <div className="space-y-4 leading-relaxed" style={{ color: C.body }}>
-                  {(aboutText || (lang === "zh"
-                    ? "我们是一家专业的草坪护理和园艺设备供应商，拥有多年的行业经验。"
-                    : "We are a professional lawn care and garden equipment supplier with years of industry experience."))
-                    .split("\n").filter(Boolean).map((line, i) => <p key={i}>{line}</p>)}
+                  {(aboutText || (lang === "zh" ? "我们是一家专业的草坪护理和园艺设备供应商。" : "We are a professional lawn care and garden equipment supplier."))
+                    .split("\n").filter(Boolean).map((line: string, i: number) => <p key={i}>{line}</p>)}
                 </div>
               </div>
               <div className="relative h-80 md:h-96 rounded-lg overflow-hidden" style={{ backgroundColor: C.light }}>
-                {aboutImage ? (
-                  <ResolvedImage src={aboutImage} alt="" fill className="object-cover" />
+                {data.image_url ? (
+                  <ResolvedImage src={data.image_url} alt="" fill className="object-cover" />
                 ) : (
                   <>
                     <div className="absolute inset-0 flex items-center justify-center text-6xl opacity-30" style={{ color: C.primary }}>🌿</div>
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-                      <span className="text-5xl font-bold mb-2" style={{ color: C.primary }}>{expYears}</span>
-                      <span className="text-lg font-medium" style={{ color: C.body }}>{lang === "zh" ? expLabelZh : expLabelEn}</span>
+                      <span className="text-5xl font-bold mb-2" style={{ color: C.primary }}>{data.years_text || "10+"}</span>
+                      <span className="text-lg font-medium" style={{ color: C.body }}>{lang === "zh" ? (data.years_label_zh || "年行业经验") : (data.years_label_en || data.years_label_zh || "Years Experience")}</span>
                     </div>
                   </>
                 )}
