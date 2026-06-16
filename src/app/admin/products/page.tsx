@@ -33,16 +33,20 @@ export default function ProductsPage() {
   }, []);
 
   const save = async (p: ProductItem) => {
-    // Move base64 images to IndexedDB before saving
-    const galleryImages = JSON.parse(p.images || "[]");
-    const savedImages = await saveImages(galleryImages);
-    // Use first gallery image as main image_url
-    const mainImage = savedImages.length > 0 ? savedImages[0] : "";
-    const processed = { ...p, image_url: mainImage, images: JSON.stringify(savedImages) };
-    const u = editing && editing.id !== 0 ? products.map((i) => (i.id === p.id ? processed : i)) : [...products, { ...processed, id: Date.now() }];
-    const { data } = await saveProduct(processed);
-    if (data) setProducts((prev: any) => editing && editing.id !== 0 ? prev.map((x: any) => x.id === processed.id ? processed : x) : [...prev, { ...processed, id: data[0]?.id || Date.now() }]);
-    setEditing(null);
+    try {
+      const { data } = await saveProduct(p as any);
+      if (data && data[0]) {
+        if (editing && editing.id !== 0) {
+          setProducts((prev: any) => prev.map((x: any) => x.id === data[0].id ? data[0] : x));
+        } else {
+          setProducts((prev: any) => [...prev, data[0]]);
+        }
+      }
+      setEditing(null);
+    } catch (e) {
+      console.error("Save failed:", e);
+      alert("保存失败，请重试");
+    }
   };
   const remove = (id: number) => {
     const u = products.filter((p) => p.id !== id); setProducts(u); 
