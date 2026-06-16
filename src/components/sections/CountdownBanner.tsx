@@ -39,7 +39,7 @@ export function CountdownBanner() {
             <p className="text-[#4caf50] font-medium text-lg mb-2 uppercase tracking-wide">{t("countdown_subtitle", lang)}</p>
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{t("countdown_title", lang)} <span className="text-[#4caf50]">{t("countdown_highlight", lang)}</span></h2>
             <p className="text-gray-300 text-lg mb-6 max-w-md">{t("countdown_desc", lang)}</p>
-            <Link href="#" className="inline-flex items-center px-8 py-3 bg-[#4caf50] hover:bg-[#388e3c] text-white font-medium rounded-md transition-colors">{t("countdown_btn", lang)} <i className="fas fa-arrow-right ml-2"></i></Link>
+            <Link href="/products" className="inline-flex items-center px-8 py-3 text-white font-medium rounded-md transition-colors" style={{ backgroundColor: "#9cc211" }}>{t("countdown_btn", lang)} <i className="fas fa-arrow-right ml-2"></i></Link>
           </div>
           <div className="flex gap-4">
             {boxes.map((box) => (
