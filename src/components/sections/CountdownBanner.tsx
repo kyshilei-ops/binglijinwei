@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useLang } from "@/lib/LanguageContext";
 import { t } from "@/lib/i18n";
@@ -34,7 +33,6 @@ export function CountdownBanner() {
   return (
     <section className="py-16 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-[#1a202c] to-[#2d3748]" />
-      <Image src="/images/banners/shop-banner.jpg" alt="" fill className="object-cover opacity-20" />
       <div className="container relative z-10">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-10">
           <div>
