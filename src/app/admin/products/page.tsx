@@ -34,7 +34,10 @@ export default function ProductsPage() {
 
   const save = async (p: ProductItem) => {
     try {
-      const { data } = await saveProduct(p as any);
+      // Use first gallery image as main image_url if no image_url set
+      const galleryImgs = (() => { try { return JSON.parse(p.images || "[]"); } catch { return []; } })();
+      const mainImg = p.image_url || (galleryImgs.length > 0 ? galleryImgs[0] : "");
+      const { data } = await saveProduct({ ...p, image_url: mainImg } as any);
       if (data && data[0]) {
         if (editing && editing.id !== 0) {
           setProducts((prev: any) => prev.map((x: any) => x.id === data[0].id ? data[0] : x));
