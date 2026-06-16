@@ -118,6 +118,7 @@ export function MultiImageUploader({ images, onChange, label }: MultiImageUpload
           type="text" value={urlInput}
           onChange={(e) => setUrlInput(e.target.value)}
           onPaste={handlePaste}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addUrl(); } }}
           placeholder={lang === "zh" ? "或粘贴图片地址" : "Or paste image URL"}
           className="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-green-500 outline-none"
         />
