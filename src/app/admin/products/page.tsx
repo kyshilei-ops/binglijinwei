@@ -49,7 +49,8 @@ export default function ProductsPage() {
     }
   };
   const remove = (id: number) => {
-    const u = products.filter((p) => p.id !== id); setProducts(u); 
+    setProducts((prev: any) => prev.filter((p: any) => p.id !== id));
+    deleteProduct(id).catch(console.error);
   };
 
   if (!products.length) return null;
