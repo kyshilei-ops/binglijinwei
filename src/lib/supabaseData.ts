@@ -77,14 +77,18 @@ const defaultSettings: SettingsRow = {
 
 // ─── Save helpers (for admin pages) ───
 export async function saveBanner(item: Partial<BannerRow>) {
-  if (item.id) return supabase.from("banners").upsert(item).select();
-  return supabase.from("banners").insert(item).select();
+  const { data: max } = await supabase.from("banners").select("id").order("id", { ascending: false }).limit(1);
+  const nextId = max?.[0]?.id ? max[0].id + 1 : 1;
+  const toSave = { ...item, id: item.id || nextId };
+  return supabase.from("banners").upsert(toSave, { onConflict: "id" }).select();
 }
 export async function deleteBanner(id: number) { return supabase.from("banners").delete().eq("id", id); }
 
 export async function saveProduct(item: Partial<ProductRow>) {
-  if (item.id) return supabase.from("products").upsert(item).select();
-  return supabase.from("products").insert(item).select();
+  const { data: max } = await supabase.from("products").select("id").order("id", { ascending: false }).limit(1);
+  const nextId = max?.[0]?.id ? max[0].id + 1 : 1;
+  const toSave = { ...item, id: item.id || nextId };
+  return supabase.from("products").upsert(toSave, { onConflict: "id" }).select();
 }
 export async function deleteProduct(id: number) { return supabase.from("products").delete().eq("id", id); }
 
