@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { useLang } from "@/lib/LanguageContext";
 import { ResolvedImage } from "./ResolvedImage";
+import { uploadImageToSupabase } from "@/lib/supabaseData";
 
 interface MultiImageUploaderProps {
   images: string[];
@@ -14,17 +15,22 @@ export function MultiImageUploader({ images, onChange, label }: MultiImageUpload
   const { lang } = useLang();
   const [dragOver, setDragOver] = useState(false);
   const [urlInput, setUrlInput] = useState("");
+  const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const processFile = useCallback((file: File) => {
+  const processFile = useCallback(async (file: File) => {
     if (!file.type.startsWith("image/")) return;
-    if (file.size > 2 * 1024 * 1024) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      onChange([...images, reader.result as string]);
-    };
-    reader.readAsDataURL(file);
-  }, [images, onChange]);
+    if (file.size > 5 * 1024 * 1024) { alert(lang === "zh" ? "图片不能超过5MB" : "Image must be under 5MB"); return; }
+    setUploading(true);
+    try {
+      const url = await uploadImageToSupabase(file);
+      onChange([...images, url]);
+    } catch (e) {
+      console.error("Upload failed:", e);
+      alert(lang === "zh" ? "上传失败，请重试" : "Upload failed, please retry");
+    }
+    setUploading(false);
+  }, [images, onChange, lang]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -91,8 +97,17 @@ export function MultiImageUploader({ images, onChange, label }: MultiImageUpload
         onClick={() => fileRef.current?.click()}
       >
         <div className="text-center text-gray-400">
-          <i className="fas fa-images text-lg mb-1"></i>
-          <p className="text-xs">{lang === "zh" ? "拖拽/点击上传 或 Ctrl+V 粘贴" : "Drop/click to upload or Ctrl+V to paste"}</p>
+          {uploading ? (
+            <div className="text-center" style={{ color: "#9cc211" }}>
+              <i className="fas fa-spinner fa-spin text-lg mb-1"></i>
+              <p className="text-xs">{lang === "zh" ? "上传中..." : "Uploading..."}</p>
+            </div>
+          ) : (
+            <>
+              <i className="fas fa-images text-lg mb-1"></i>
+              <p className="text-xs">{lang === "zh" ? "拖拽/点击上传 或 Ctrl+V 粘贴" : "Drop/click to upload or Ctrl+V to paste"}</p>
+            </>
+          )}
         </div>
         <input ref={fileRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
       </div>

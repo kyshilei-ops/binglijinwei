@@ -17,24 +17,25 @@ export function ImageUploader({ value, onChange, label }: ImageUploaderProps) {
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const processFile = useCallback((file: File) => {
+  const processFile = useCallback(async (file: File) => {
     if (!file.type.startsWith("image/")) {
       setError(lang === "zh" ? "只支持图片文件" : "Only image files supported");
       return;
     }
-    if (file.size > 2 * 1024 * 1024) {
-      setError(lang === "zh" ? "图片不能超过2MB" : "Image must be under 2MB");
+    if (file.size > 5 * 1024 * 1024) {
+      setError(lang === "zh" ? "图片不能超过5MB" : "Image must be under 5MB");
       return;
     }
     setError("");
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      setPreview(dataUrl);
-      onChange(dataUrl);
-    };
-    reader.readAsDataURL(file);
-  }, [onChange]);
+    try {
+      const { uploadImageToSupabase } = await import("@/lib/supabaseData");
+      const url = await uploadImageToSupabase(file);
+      setPreview(url);
+      onChange(url);
+    } catch (e) {
+      setError(lang === "zh" ? "上传失败" : "Upload failed");
+    }
+  }, [onChange, lang]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();

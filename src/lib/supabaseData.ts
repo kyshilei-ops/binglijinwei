@@ -123,10 +123,10 @@ export function saveToStorage(key: string, data: unknown) {
 }
 
 // ─── Image upload to Supabase Storage ───
-export async function uploadImage(file: File, bucket = "product-images"): Promise<string> {
+export async function uploadImageToSupabase(file: File, bucket = "product-images"): Promise<string> {
   const ext = file.name.split(".").pop() || "png";
   const name = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const { data, error } = await supabase.storage.from(bucket).upload(name, file, { upsert: true });
+  const { error } = await supabase.storage.from(bucket).upload(name, file, { upsert: true });
   if (error) throw error;
   const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(name);
   return urlData.publicUrl;
