@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLang } from "@/lib/LanguageContext";
 import { saveSettings } from "@/lib/supabaseData";
-import { supabase } from "@/lib/supabaseData";
+import { supabase } from "@/lib/supabase";
 import { t } from "@/lib/i18n";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 

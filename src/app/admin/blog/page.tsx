@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLang } from "@/lib/LanguageContext";
 import { saveBlog, deleteBlog } from "@/lib/supabaseData";
-import { supabase } from "@/lib/supabaseData";
+import { supabase } from "@/lib/supabase";
 import { t } from "@/lib/i18n";
 
 interface BlogItem { id: number; title: string; excerpt: string; content: string; image_url: string; category: string; author: string; published_at: string; }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLang } from "@/lib/LanguageContext";
 import { saveBanner, deleteBanner } from "@/lib/supabaseData";
-import { supabase } from "@/lib/supabaseData";
+import { supabase } from "@/lib/supabase";
 import { t } from "@/lib/i18n";
 
 interface BannerItem { id: number; title: string; subtitle: string; highlight: string; description: string; image_url: string; button1_label: string; button2_label: string; is_active: boolean; sort_order: number; }

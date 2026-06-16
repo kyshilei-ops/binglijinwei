@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLang } from "@/lib/LanguageContext";
 import { saveTestimonial, deleteTestimonial } from "@/lib/supabaseData";
-import { supabase } from "@/lib/supabaseData";
+import { supabase } from "@/lib/supabase";
 import { t } from "@/lib/i18n";
 
 interface TItem { id: number; name: string; role: string; text: string; image_url: string; rating: number; }

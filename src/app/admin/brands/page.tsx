@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLang } from "@/lib/LanguageContext";
 import { saveBrand, deleteBrand } from "@/lib/supabaseData";
-import { supabase } from "@/lib/supabaseData";
+import { supabase } from "@/lib/supabase";
 import { t } from "@/lib/i18n";
 
 interface BItem { id: number; name: string; image_url: string; }
