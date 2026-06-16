@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLang } from "@/lib/LanguageContext";
 import { saveBanner, deleteBanner } from "@/lib/supabaseData";
+import { supabase } from "@/lib/supabaseData";
 import { t } from "@/lib/i18n";
 
 interface BannerItem { id: number; title: string; subtitle: string; highlight: string; description: string; image_url: string; button1_label: string; button2_label: string; is_active: boolean; sort_order: number; }
@@ -24,14 +25,14 @@ export default function BannersPage() {
 
   const save = (b: BannerItem) => {
     const u = editing && editing.id !== 0 ? banners.map((i) => (i.id === b.id ? b : i)) : [...banners, { ...b, id: Date.now(), is_active: true, sort_order: banners.length + 1 }];
-    setBanners(u); setEditing(null);
+    setBanners(u); saveBanner(b).catch(console.error); setEditing(null);
   };
   const toggle = (id: number) => {
     const u = banners.map((b) => (b.id === id ? { ...b, is_active: !b.is_active } : b));
-    setBanners(u);
+    setBanners(u); saveBanner(b).catch(console.error);
   };
   const remove = (id: number) => {
-    const u = banners.filter((b) => b.id !== id); setBanners(u);
+    const u = banners.filter((b) => b.id !== id); setBanners(u); saveBanner(b).catch(console.error);
   };
 
   if (!banners.length) return null;

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLang } from "@/lib/LanguageContext";
 import { saveBrand, deleteBrand } from "@/lib/supabaseData";
+import { supabase } from "@/lib/supabaseData";
 import { t } from "@/lib/i18n";
 
 interface BItem { id: number; name: string; image_url: string; }
@@ -19,12 +20,12 @@ export default function BrandsPage() {
 
   useEffect(() => {
     if (sessionStorage.getItem("admin_auth") !== "true") { window.location.href = "/admin"; return; }
-    setItems(JSON.parse(localStorage.getItem("cms_brands") || "null") || defaults);
+    setItems([]);
   }, []);
 
   const save = (b: BItem) => {
     const u = editing && editing.id !== 0 ? items.map((i) => (i.id === b.id ? b : i)) : [...items, { ...b, id: Date.now() }];
-    setItems(u); saveBrand(b); setEditing(null);
+    setItems(u); saveBrand(b).catch(console.error); setEditing(null);
   };
 
   if (!items.length) return null;

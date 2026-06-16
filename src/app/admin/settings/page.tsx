@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLang } from "@/lib/LanguageContext";
 import { saveSettings } from "@/lib/supabaseData";
+import { supabase } from "@/lib/supabaseData";
 import { t } from "@/lib/i18n";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 
@@ -16,8 +17,9 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (sessionStorage.getItem("admin_auth") !== "true") { window.location.href = "/admin"; return; }
-    const s = localStorage.getItem("cms_settings");
-    if (s) setSettings(JSON.parse(s));
+    supabase.from("site_settings").select("*").limit(1).single().then(({ data }: any) => {
+      if (data) setSettings(data);
+    });
   }, []);
 
   const handleSave = () => { saveSettings(settings as any); setSaved(true); setTimeout(() => setSaved(false), 2000); };

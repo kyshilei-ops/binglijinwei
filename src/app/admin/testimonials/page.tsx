@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLang } from "@/lib/LanguageContext";
 import { saveTestimonial, deleteTestimonial } from "@/lib/supabaseData";
+import { supabase } from "@/lib/supabaseData";
 import { t } from "@/lib/i18n";
 
 interface TItem { id: number; name: string; role: string; text: string; image_url: string; rating: number; }
@@ -19,12 +20,12 @@ export default function TestimonialsPage() {
 
   useEffect(() => {
     if (sessionStorage.getItem("admin_auth") !== "true") { window.location.href = "/admin"; return; }
-    setItems(JSON.parse(localStorage.getItem("cms_testimonials") || "null") || defaults);
+    setItems([]);
   }, []);
 
   const save = (t: TItem) => {
     const u = editing && editing.id !== 0 ? items.map((i) => (i.id === t.id ? t : i)) : [...items, { ...t, id: Date.now() }];
-    setItems(u); saveTestimonial(t); setEditing(null);
+    setItems(u); saveTestimonial(t).catch(console.error); setEditing(null);
   };
 
   if (!items.length) return null;

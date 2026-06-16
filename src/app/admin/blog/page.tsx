@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLang } from "@/lib/LanguageContext";
 import { saveBlog, deleteBlog } from "@/lib/supabaseData";
+import { supabase } from "@/lib/supabaseData";
 import { t } from "@/lib/i18n";
 
 interface BlogItem { id: number; title: string; excerpt: string; content: string; image_url: string; category: string; author: string; published_at: string; }
@@ -24,7 +25,7 @@ export default function BlogPage() {
 
   const save = (p: BlogItem) => {
     const u = editing && editing.id !== 0 ? posts.map((i) => (i.id === p.id ? p : i)) : [...posts, { ...p, id: Date.now(), published_at: new Date().toISOString().split("T")[0] }];
-    setPosts(u); saveBlog(p); setEditing(null);
+    setPosts(u); saveBlog(p).catch(console.error); setEditing(null);
   };
   const remove = (id: number) => { const u = posts.filter((p) => p.id !== id); setPosts(u); deleteBlog(id); };
 
