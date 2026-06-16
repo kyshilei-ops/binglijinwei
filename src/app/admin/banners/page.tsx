@@ -28,11 +28,14 @@ export default function BannersPage() {
     setBanners(u); saveBanner(b).catch(console.error); setEditing(null);
   };
   const toggle = (id: number) => {
-    const u = banners.map((b) => (b.id === id ? { ...b, is_active: !b.is_active } : b));
-    setBanners(u); saveBanner(b).catch(console.error);
+    const updated = banners.map((x) => x.id === id ? { ...x, is_active: !x.is_active } : x);
+    const banner = updated.find((x) => x.id === id);
+    setBanners(updated);
+    if (banner) saveBanner(banner).catch(console.error);
   };
   const remove = (id: number) => {
-    const u = banners.filter((b) => b.id !== id); setBanners(u); saveBanner(b).catch(console.error);
+    setBanners((prev: any) => prev.filter((x: any) => x.id !== id));
+    deleteBanner(id).catch(console.error);
   };
 
   if (!banners.length) return null;
