@@ -26,7 +26,10 @@ export default function ProductsPage() {
 
   useEffect(() => {
     if (sessionStorage.getItem("admin_auth") !== "true") { window.location.href = "/admin"; return; }
-    setProducts(JSON.parse(localStorage.getItem("cms_products") || "null") || defaults);
+    supabase.from("products").select("*").order("id").then(({ data }: any) => {
+      if (data && data.length > 0) setProducts(data);
+      else setProducts(defaults);
+    });
   }, []);
 
   const save = async (p: ProductItem) => {
@@ -37,7 +40,9 @@ export default function ProductsPage() {
     const mainImage = savedImages.length > 0 ? savedImages[0] : "";
     const processed = { ...p, image_url: mainImage, images: JSON.stringify(savedImages) };
     const u = editing && editing.id !== 0 ? products.map((i) => (i.id === p.id ? processed : i)) : [...products, { ...processed, id: Date.now() }];
-    setProducts(u); saveProduct(processed); setEditing(null);
+    const { data } = await saveProduct(processed);
+    if (data) setProducts((prev: any) => editing && editing.id !== 0 ? prev.map((x: any) => x.id === processed.id ? processed : x) : [...prev, { ...processed, id: data[0]?.id || Date.now() }]);
+    setEditing(null);
   };
   const remove = (id: number) => {
     const u = products.filter((p) => p.id !== id); setProducts(u); 
