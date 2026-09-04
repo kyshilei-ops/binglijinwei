@@ -55,10 +55,32 @@ body {
   display: none;
 }
 
+.hero-banner {
+  height: clamp(380px, 36.46vw, 700px);
+}
+
+.hero-banner-content {
+  background: #102e19;
+  padding: 28px 0 42px;
+}
+
+@media (max-width: 639px) {
+  .hero-banner,
+  .hero-banner .swiper-wrapper,
+  .hero-banner .swiper-slide {
+    height: auto;
+  }
+}
+
 @media (min-width: 640px) {
   .hero-banner .swiper-button-next,
   .hero-banner .swiper-button-prev {
     display: flex;
+  }
+
+  .hero-banner-content {
+    background: transparent;
+    padding: 0;
   }
 }
 

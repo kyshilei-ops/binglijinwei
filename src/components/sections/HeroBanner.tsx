@@ -29,14 +29,15 @@ export function HeroBanner() {
         effect="fade"
         loop
         className="hero-banner w-full"
-        style={{ height: "clamp(380px, 36.46vw, 700px)" }}
       >
         {banners.map((slide, i) => (
           <SwiperSlide key={slide.id}>
-            <div className="relative w-full h-full">
-              <ResolvedImage src={slide.image_url} alt={slide.title} fill className="object-cover" />
-              <div className="absolute inset-0 bg-black/40" />
-              <div className="absolute inset-0 flex items-center">
+            <div className="relative flex flex-col sm:block h-auto sm:h-full">
+              <div className="relative w-full shrink-0 sm:absolute sm:inset-0" style={{ aspectRatio: "1920 / 700", backgroundColor: "#102e19" }}>
+                <ResolvedImage src={slide.image_url} alt={slide.title} fill className="object-contain sm:object-cover" />
+              </div>
+              <div className="hidden sm:block absolute inset-0 bg-black/40" />
+              <div className="hero-banner-content relative flex flex-1 items-center sm:absolute sm:inset-0">
                 <div className="container w-full px-5 sm:px-8 lg:px-4">
                   <div className="max-w-[700px]">
                     <p className="font-medium mb-2 sm:mb-3 uppercase tracking-wide" style={{ color: "#9cc211", fontSize: "clamp(0.75rem, 1.25vw, 1.125rem)" }}>{lang === "zh" ? slide.subtitle : (slide.subtitle_en || slide.subtitle)}</p>
