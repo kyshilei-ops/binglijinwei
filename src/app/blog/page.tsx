@@ -6,6 +6,7 @@ import { safeImageUrl } from "@/lib/imageUrl";
 import { useCmsBlog } from "@/lib/supabaseData";
 import { useLang } from "@/lib/LanguageContext";
 import { t } from "@/lib/i18n";
+import { localizedField } from "@/lib/localizedFields";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -34,7 +35,7 @@ export default function BlogPage() {
                   <div className="p-6">
                     <div className="flex items-center gap-4 text-xs text-gray-400 mb-3">
                       <span><i className="far fa-calendar mr-1"></i>{post.published_at}</span>
-                      <span><i className="far fa-user mr-1"></i>{post.author}</span>
+                      <span><i className="far fa-user mr-1"></i>{localizedField(post.author, lang)}</span>
                     </div>
                     <h3 className="text-lg font-semibold text-[#1a202c] mb-2 group-hover:text-[#4caf50] transition-colors">{lang === "zh" ? post.title : (post.title_en || post.title)}</h3>
                     <p className="text-sm text-[#4a5568] line-clamp-2">{lang === "zh" ? post.excerpt : (post.excerpt_en || post.excerpt)}</p>

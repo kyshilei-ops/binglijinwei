@@ -59,6 +59,31 @@ body {
   background: #4caf50;
 }
 
+/* Long-form article typography, including CMS-authored HTML content. */
+.blog-content h2 {
+  color: #1a202c;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+  line-height: 1.35;
+  margin: 2rem 0 0.8rem;
+}
+
+.blog-content p {
+  margin: 0 0 1rem;
+}
+
+.blog-content ul,
+.blog-content ol {
+  margin: 0 0 1.25rem;
+  padding-left: 1.35rem;
+}
+
+.blog-content ul { list-style: disc; }
+.blog-content ol { list-style: decimal; }
+.blog-content li { margin: 0.45rem 0; }
+.blog-content strong { color: #1a202c; }
+
 /* Hero controls stay out of the way on compact screens. */
 .hero-banner .swiper-button-next,
 .hero-banner .swiper-button-prev {

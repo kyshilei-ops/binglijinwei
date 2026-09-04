@@ -1,62 +1,150 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLang } from "@/lib/LanguageContext";
-import { saveBlog, deleteBlog } from "@/lib/supabaseData";
-import { supabase } from "@/lib/supabase";
+import { deleteBlog, saveBlog, type BlogRow, useCmsBlogAll } from "@/lib/supabaseData";
+import { decodeLocalizedField, encodeLocalizedField } from "@/lib/localizedFields";
+import { SingleImageUploader } from "@/components/ui/SingleImageUploader";
 import { t } from "@/lib/i18n";
 
-interface BlogItem { id: number; title: string; excerpt: string; content: string; image_url: string; category: string; author: string; published_at: string; }
-const defaults: BlogItem[] = [
-  { id: 1, title: "夏季如何养护草坪", excerpt: "夏季高温对草坪来说是个考验。了解最佳的浇水和修剪技巧，保持草坪翠绿。", content: "", image_url: "/images/blog/blog-13.jpg", category: "草坪护理", author: "管理员", published_at: "2024-06-15" },
-  { id: 2, title: "每个家庭必备的10大园艺工具", excerpt: "无论您是初学者还是经验丰富的园丁，这些必备工具都能让您的工作更轻松。", content: "", image_url: "/images/blog/blog-14.jpg", category: "工具", author: "管理员", published_at: "2024-05-28" },
-  { id: 3, title: "如何为您的院子选择合适的割草机", excerpt: "了解哪种类型最适合您的草坪大小和地形。", content: "", image_url: "/images/blog/blog-15.jpg", category: "设备", author: "管理员", published_at: "2024-04-12" },
-];
+interface BlogItem {
+  id: number;
+  title: string;
+  title_en: string;
+  excerpt: string;
+  excerpt_en: string;
+  content: string;
+  content_en: string;
+  image_url: string;
+  category: string;
+  category_en: string;
+  author: string;
+  author_en: string;
+  published_at: string;
+}
+
+function emptyPost(): BlogItem {
+  return {
+    id: 0, title: "", title_en: "", excerpt: "", excerpt_en: "", content: "", content_en: "",
+    image_url: "", category: "", category_en: "", author: "秉立锦为", author_en: "Binglijinwei", published_at: "",
+  };
+}
+
+function toBlogItem(row: BlogRow): BlogItem {
+  const content = decodeLocalizedField(row.content);
+  const author = decodeLocalizedField(row.author);
+  return {
+    ...row,
+    content: content.zh,
+    content_en: content.en,
+    author: author.zh,
+    author_en: author.en,
+  };
+}
+
+function toBlogRow(item: BlogItem): Partial<BlogRow> {
+  const row: Partial<BlogRow> = {
+    title: item.title,
+    title_en: item.title_en,
+    excerpt: item.excerpt,
+    excerpt_en: item.excerpt_en,
+    content: encodeLocalizedField(item.content, item.content_en),
+    image_url: item.image_url,
+    category: item.category,
+    category_en: item.category_en,
+    author: encodeLocalizedField(item.author, item.author_en),
+    published_at: item.published_at || new Date().toISOString().slice(0, 10),
+  };
+  if (item.id) row.id = item.id;
+  return row;
+}
+
+function Field({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+  return <div><label className="block text-xs font-medium text-gray-600 mb-1">{label}</label><input type="text" value={value} onChange={(e) => onChange(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-green-500 outline-none" /></div>;
+}
+
+function TextArea({ label, value, onChange, rows = 3 }: { label: string; value: string; onChange: (value: string) => void; rows?: number }) {
+  return <div><label className="block text-xs font-medium text-gray-600 mb-1">{label}</label><textarea value={value} onChange={(e) => onChange(e.target.value)} rows={rows} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-green-500 outline-none leading-relaxed" /></div>;
+}
 
 export default function BlogPage() {
   const { lang } = useLang();
-  const [posts, setPosts] = useState<BlogItem[]>([]);
+  const { data: rows, setData: setRows, loading } = useCmsBlogAll();
   const [editing, setEditing] = useState<BlogItem | null>(null);
+  const posts = useMemo(() => rows.map(toBlogItem).sort((a, b) => b.published_at.localeCompare(a.published_at)), [rows]);
+  const isZh = lang === "zh";
 
   useEffect(() => {
-    if (sessionStorage.getItem("admin_auth") !== "true") { window.location.href = "/admin"; return; }
-    setPosts(JSON.parse(localStorage.getItem("cms_blog") || "null") || defaults);
+    if (sessionStorage.getItem("admin_auth") !== "true") window.location.href = "/admin";
   }, []);
 
-  const save = (p: BlogItem) => {
-    const u = editing && editing.id !== 0 ? posts.map((i) => (i.id === p.id ? p : i)) : [...posts, { ...p, id: Date.now(), published_at: new Date().toISOString().split("T")[0] }];
-    setPosts(u); saveBlog(p).catch(console.error); setEditing(null);
-  };
-  const remove = (id: number) => { const u = posts.filter((p) => p.id !== id); setPosts(u); deleteBlog(id); };
+  const update = (key: keyof BlogItem, value: string) => setEditing((current) => current ? { ...current, [key]: value } : current);
 
-  if (!posts.length) return null;
+  const save = async (post: BlogItem) => {
+    try {
+      const { data, error } = await saveBlog(toBlogRow(post));
+      if (error) throw error;
+      const saved = data?.[0] as BlogRow | undefined;
+      if (saved) setRows((current) => current.some((item) => item.id === saved.id) ? current.map((item) => item.id === saved.id ? saved : item) : [...current, saved]);
+      setEditing(null);
+    } catch (error) {
+      console.error("Save blog post failed:", error);
+      alert(isZh ? "保存失败，请重试。" : "Could not save the post. Please try again.");
+    }
+  };
+
+  const remove = async (id: number) => {
+    if (!window.confirm(isZh ? "确定删除这篇文章吗？" : "Delete this post?")) return;
+    const { error } = await deleteBlog(id);
+    if (error) { alert(isZh ? "删除失败，请重试。" : "Could not delete the post. Please try again."); return; }
+    setRows((current) => current.filter((post) => post.id !== id));
+  };
+
+  if (loading) return <div className="py-16 text-center text-gray-400">{isZh ? "正在读取文章…" : "Loading posts…"}</div>;
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">{t("admin_blog_title", lang)}</h1>
-        <button onClick={() => setEditing({ id: 0, title: "", excerpt: "", content: "", image_url: "", category: "", author: "管理员", published_at: "" })} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-          <i className="fas fa-plus mr-2"></i>{t("blog_add", lang)}
-        </button>
+        <button onClick={() => setEditing(emptyPost())} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"><i className="fas fa-plus mr-2"></i>{t("blog_add", lang)}</button>
       </div>
+
       {editing && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-auto">
-            <h2 className="text-lg font-semibold mb-4">{(editing.id ? t("blog_edit", lang) : t("blog_add", lang))} {t("sidebar_blog", lang)}</h2>
-            <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save(editing); }}>
-              {[{ l: t("admin_title_field", lang), k: "title" }, { l: t("prod_category", lang), k: "category" }, { l: t("blog_author", lang), k: "author" }, { l: t("admin_image_url", lang), k: "image_url" }].map((f) => (
-                <div key={f.k}><label className="block text-xs font-medium text-gray-600 mb-1">{f.l}</label><input type="text" value={(editing as any)[f.k]} onChange={(e) => setEditing({ ...editing, [f.k]: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-green-500 outline-none" /></div>
-              ))}
-              <div><label className="block text-xs font-medium text-gray-600 mb-1">{t("blog_excerpt", lang)}</label><textarea value={editing.excerpt} onChange={(e) => setEditing({ ...editing, excerpt: e.target.value })} rows={3} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-green-500 outline-none" /></div>
-              <div><label className="block text-xs font-medium text-gray-600 mb-1">{t("blog_content", lang)}</label><textarea value={editing.content} onChange={(e) => setEditing({ ...editing, content: e.target.value })} rows={6} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-green-500 outline-none font-mono" /></div>
-              <div className="flex gap-2 pt-2"><button type="submit" className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-md text-sm font-medium">{t("admin_save", lang)}</button><button type="button" onClick={() => setEditing(null)} className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-md text-sm font-medium">{t("admin_cancel", lang)}</button></div>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-auto">
+            <h2 className="text-lg font-semibold mb-5">{editing.id ? t("blog_edit", lang) : t("blog_add", lang)}{isZh ? "文章" : " post"}</h2>
+            <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); save(editing); }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <Field label={isZh ? "中文标题" : "Chinese title"} value={editing.title} onChange={(value) => update("title", value)} />
+                <Field label={isZh ? "英文标题" : "English title"} value={editing.title_en} onChange={(value) => update("title_en", value)} />
+                <Field label={isZh ? "中文分类" : "Chinese category"} value={editing.category} onChange={(value) => update("category", value)} />
+                <Field label={isZh ? "英文分类" : "English category"} value={editing.category_en} onChange={(value) => update("category_en", value)} />
+                <Field label={isZh ? "中文作者" : "Chinese author"} value={editing.author} onChange={(value) => update("author", value)} />
+                <Field label={isZh ? "英文作者" : "English author"} value={editing.author_en} onChange={(value) => update("author_en", value)} />
+              </div>
+
+              <SingleImageUploader value={editing.image_url} onChange={(value) => update("image_url", value)} label={isZh ? "文章封面图" : "Cover image"} />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <TextArea label={isZh ? "中文摘要" : "Chinese excerpt"} value={editing.excerpt} onChange={(value) => update("excerpt", value)} />
+                <TextArea label={isZh ? "英文摘要" : "English excerpt"} value={editing.excerpt_en} onChange={(value) => update("excerpt_en", value)} />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <TextArea label={isZh ? "中文正文（可使用 HTML）" : "Chinese content (HTML supported)"} value={editing.content} onChange={(value) => update("content", value)} rows={12} />
+                <TextArea label={isZh ? "英文正文（可使用 HTML）" : "English content (HTML supported)"} value={editing.content_en} onChange={(value) => update("content_en", value)} rows={12} />
+              </div>
+
+              <div className="flex gap-2 pt-1"><button type="submit" className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-md text-sm font-medium">{t("admin_save", lang)}</button><button type="button" onClick={() => setEditing(null)} className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-md text-sm font-medium">{t("admin_cancel", lang)}</button></div>
             </form>
           </div>
         </div>
       )}
+
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
         <table className="w-full text-sm"><thead className="bg-gray-50"><tr><th className="text-left px-4 py-3 font-medium text-gray-600">{t("admin_title_field", lang)}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t("prod_category", lang)}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t("blog_date", lang)}</th><th className="text-right px-4 py-3 font-medium text-gray-600">{t("admin_actions", lang)}</th></tr></thead>
-          <tbody>{posts.map((p) => (<tr key={p.id} className="border-t border-gray-100"><td className="px-4 py-3 font-medium text-gray-800">{p.title}</td><td className="px-4 py-3 text-gray-500">{p.category}</td><td className="px-4 py-3 text-gray-500">{p.published_at}</td><td className="px-4 py-3 text-right"><button onClick={() => setEditing(p)} className="text-blue-500 hover:text-blue-700 mr-3"><i className="fas fa-edit"></i></button><button onClick={() => remove(p.id)} className="text-red-500 hover:text-red-700"><i className="fas fa-trash"></i></button></td></tr>))}</tbody></table>
+          <tbody>{posts.map((post) => (<tr key={post.id} className="border-t border-gray-100"><td className="px-4 py-3 font-medium text-gray-800">{isZh ? post.title : (post.title_en || post.title)}</td><td className="px-4 py-3 text-gray-500">{isZh ? post.category : (post.category_en || post.category)}</td><td className="px-4 py-3 text-gray-500">{post.published_at}</td><td className="px-4 py-3 text-right"><button onClick={() => setEditing(post)} className="text-blue-500 hover:text-blue-700 mr-3" aria-label={isZh ? "编辑" : "Edit"}><i className="fas fa-edit"></i></button><button onClick={() => remove(post.id)} className="text-red-500 hover:text-red-700" aria-label={isZh ? "删除" : "Delete"}><i className="fas fa-trash"></i></button></td></tr>))}</tbody>
+        </table>
+        {posts.length === 0 && <p className="py-10 text-center text-gray-400">{isZh ? "还没有文章。" : "No posts yet."}</p>}
       </div>
     </div>
   );

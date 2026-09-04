@@ -94,7 +94,8 @@ export async function deleteProduct(id: number) { return supabase.from("products
 
 export async function saveBlog(item: Partial<BlogRow>) {
   if (item.id) return supabase.from("blog_posts").upsert(item).select();
-  return supabase.from("blog_posts").insert(item).select();
+  const { id: _id, ...newItem } = item;
+  return supabase.from("blog_posts").insert(newItem).select();
 }
 export async function deleteBlog(id: number) { return supabase.from("blog_posts").delete().eq("id", id); }
 

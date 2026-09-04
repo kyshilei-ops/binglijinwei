@@ -7,6 +7,7 @@ import { safeImageUrl } from "@/lib/imageUrl";
 import { useCmsBlog } from "@/lib/supabaseData";
 import { useLang } from "@/lib/LanguageContext";
 import { t } from "@/lib/i18n";
+import { localizedField } from "@/lib/localizedFields";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -31,6 +32,9 @@ export default function BlogPostPage() {
     );
   }
 
+  const postContent = localizedField(post.content, lang);
+  const postAuthor = localizedField(post.author, lang);
+
   return (
     <>
       <Header />
@@ -49,7 +53,7 @@ export default function BlogPostPage() {
             <h1 className="text-3xl md:text-4xl font-bold text-[#1a202c] mb-4">{lang === "zh" ? post.title : (post.title_en || post.title)}</h1>
             <div className="flex items-center gap-4 text-sm text-gray-400 mb-8">
               <span><i className="far fa-calendar mr-1"></i>{post.published_at}</span>
-              <span><i className="far fa-user mr-1"></i>{post.author}</span>
+              <span><i className="far fa-user mr-1"></i>{postAuthor}</span>
             </div>
 
             {post.image_url && (
@@ -58,9 +62,9 @@ export default function BlogPostPage() {
               </div>
             )}
 
-            <div className="prose max-w-none text-[#4a5568] leading-relaxed text-lg">
-              {post.content ? (
-                <div dangerouslySetInnerHTML={{ __html: post.content }} />
+            <div className="blog-content max-w-none text-[#4a5568] leading-relaxed text-lg">
+              {postContent ? (
+                <div dangerouslySetInnerHTML={{ __html: postContent }} />
               ) : (
                 <>
                   <p>{post.excerpt}</p>
