@@ -34,9 +34,9 @@ export default function ProductsPage() {
 
   const save = async (p: ProductItem) => {
     try {
-      // Use first gallery image as main image_url if no image_url set
+      // Main image is always the first gallery image (gallery wins over old image_url)
       const galleryImgs = (() => { try { return JSON.parse(p.images || "[]"); } catch { return []; } })();
-      const mainImg = p.image_url || (galleryImgs.length > 0 ? galleryImgs[0] : "");
+      const mainImg = galleryImgs.length > 0 ? galleryImgs[0] : (p.image_url || "");
       const { data } = await saveProduct({ ...p, image_url: mainImg } as any);
       if (data && data[0]) {
         if (editing && editing.id !== 0) {
