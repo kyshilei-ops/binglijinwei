@@ -67,14 +67,14 @@ export const translations = {
 
   // Service Features
   service_title: { en: "Why Choose Us", zh: "为什么选择我们" },
-  service_shipping_title: { en: "Free Shipping", zh: "免费配送" },
-  service_shipping_desc: { en: "Free shipping on all orders over $99. Fast and reliable delivery to your doorstep.", zh: "订单满$99免运费，快速可靠送达您家门口。" },
-  service_payment_title: { en: "Secure Payment", zh: "安全支付" },
-  service_payment_desc: { en: "100% secure payment gateway. Your financial data is always protected.", zh: "100%安全支付网关，您的财务数据始终受到保护。" },
-  service_support_title: { en: "24/7 Support", zh: "全天候支持" },
-  service_support_desc: { en: "Round-the-clock customer support. We're always here to help you out.", zh: "全天候客户支持，我们随时为您提供帮助。" },
-  service_returns_title: { en: "Easy Returns", zh: "轻松退换" },
-  service_returns_desc: { en: "30-day hassle-free return policy. Not satisfied? Get a full refund.", zh: "30天无理由退换货。不满意？全额退款。" },
+  service_quality_title: { en: "Quality Assurance", zh: "品质保障" },
+  service_quality_desc: { en: "Reliable materials and core components, rigorously inspected for dependable performance.", zh: "严选可靠材质与核心部件，经过多重检测，确保设备经久耐用。" },
+  service_service_title: { en: "Professional Service", zh: "专业服务" },
+  service_service_desc: { en: "From product selection to operation guidance, we respond quickly to every need.", zh: "从选型咨询到使用指导，快速响应您的每一次需求。" },
+  service_innovation_title: { en: "Engineering Innovation", zh: "技术创新" },
+  service_innovation_desc: { en: "We continuously refine power and structural design for more efficient equipment.", zh: "持续优化动力与结构设计，让设备更高效、更省心。" },
+  service_after_sales_title: { en: "Reliable After-sales", zh: "售后支持" },
+  service_after_sales_desc: { en: "Clear after-sales support and spare-parts service make every use more reassuring.", zh: "提供清晰的售后支持与配件服务，让每一次使用更安心。" },
 
   // Categories
   cat_subtitle: { en: "Shop By Category", zh: "按分类选购" },

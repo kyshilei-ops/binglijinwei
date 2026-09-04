@@ -49,6 +49,16 @@ body {
   background: #4caf50 !important;
 }
 
+.service-feature-icon {
+  color: #4caf50;
+  background: #eef7e5;
+}
+
+.group:hover .service-feature-icon {
+  color: #ffffff;
+  background: #4caf50;
+}
+
 /* Hero controls stay out of the way on compact screens. */
 .hero-banner .swiper-button-next,
 .hero-banner .swiper-button-prev {

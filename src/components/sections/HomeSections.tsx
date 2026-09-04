@@ -7,15 +7,29 @@ import { useLang } from "@/lib/LanguageContext";
 import { t } from "@/lib/i18n";
 import { useCmsProducts } from "@/lib/supabaseData";
 
-const icons = ["🚚", "🛡️", "🎧", "🔄"];
+function QualityIcon() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3 19 6v5c0 5-3 8.2-7 10-4-1.8-7-5-7-10V6l7-3Z" /><path d="m8.8 12 2.1 2.1 4.4-4.4" /></svg>;
+}
+
+function ServiceIcon() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 13v-1a8 8 0 0 1 16 0v1" /><path d="M5 13h2v5H5a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2ZM19 13h-2v5h2a2 2 0 0 0 2-2v-1a2 2 0 0 0-2-2Z" /><path d="M17 18c0 1.7-1.3 3-3 3h-2" /></svg>;
+}
+
+function InnovationIcon() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 18h6" /><path d="M10 22h4" /><path d="M8.7 15.3A7 7 0 1 1 15.3 15c-.9.7-1.3 1.7-1.3 2.7h-4c0-1-.4-1.8-1.3-2.4Z" /><path d="M12 2v1.2M4.9 5l.9.9M19.1 5l-.9.9" /></svg>;
+}
+
+function AfterSalesIcon() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m14.7 6.3-8.4 8.4a2.3 2.3 0 0 0 3.3 3.3l8.4-8.4" /><path d="M15.4 3.4a4.5 4.5 0 0 0 5.2 5.2l-4.2 4.2-3.3-3.3 4.2-4.2a4.6 4.6 0 0 0-1.9-1.8Z" /><path d="m4.5 19.5 1.2 1.2" /></svg>;
+}
 
 export function ServiceFeatures() {
   const { lang } = useLang();
   const services = [
-    { title: t("service_shipping_title", lang), desc: t("service_shipping_desc", lang) },
-    { title: t("service_payment_title", lang), desc: t("service_payment_desc", lang) },
-    { title: t("service_support_title", lang), desc: t("service_support_desc", lang) },
-    { title: t("service_returns_title", lang), desc: t("service_returns_desc", lang) },
+    { title: t("service_quality_title", lang), desc: t("service_quality_desc", lang), Icon: QualityIcon },
+    { title: t("service_service_title", lang), desc: t("service_service_desc", lang), Icon: ServiceIcon },
+    { title: t("service_innovation_title", lang), desc: t("service_innovation_desc", lang), Icon: InnovationIcon },
+    { title: t("service_after_sales_title", lang), desc: t("service_after_sales_desc", lang), Icon: AfterSalesIcon },
   ];
 
   return (
@@ -24,7 +38,9 @@ export function ServiceFeatures() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {services.map((s, i) => (
             <div key={i} className="bg-white rounded-lg border border-[#e5e5e5] p-10 text-center hover:shadow-lg transition-shadow group">
-              <div className="text-4xl mb-5">{icons[i]}</div>
+              <div className="service-feature-icon w-14 h-14 mx-auto mb-5 rounded-full flex items-center justify-center transition-colors">
+                <s.Icon />
+              </div>
               <h3 className="text-lg font-semibold text-[#1a202c] mb-3 group-hover:text-[#4caf50] transition-colors">{s.title}</h3>
               <p className="text-sm text-[#4a5568] leading-relaxed">{s.desc}</p>
             </div>
