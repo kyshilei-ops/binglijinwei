@@ -15,18 +15,45 @@ interface Props {
   unoptimized?: boolean;
 }
 
+function directImageUrl(src: string | undefined | null) {
+  if (!src) return "";
+  if (src.startsWith("data:image/") || src.startsWith("http://") || src.startsWith("https://") || src.startsWith("/")) {
+    return src;
+  }
+  return "";
+}
+
 export function ResolvedImage({ src, alt, fill, width, height, className, priority, unoptimized }: Props) {
-  const [resolved, setResolved] = useState("/images/products/p01.jpg");
+  const directSrc = directImageUrl(src);
+  const [resolved, setResolved] = useState("");
+
   useEffect(() => {
-    let c = false;
-    resolveImage(src || "").then((r) => { if (!c) setResolved(r); });
-    return () => { c = true; };
+    let cancelled = false;
+
+    // Cloud URLs, local paths and data URLs can be rendered immediately.
+    // Only legacy IndexedDB image keys need asynchronous resolution.
+    if (!src || directImageUrl(src)) {
+      setResolved("");
+      return () => { cancelled = true; };
+    }
+
+    setResolved("");
+    resolveImage(src).then((result) => {
+      if (!cancelled) setResolved(directImageUrl(result));
+    });
+    return () => { cancelled = true; };
   }, [src]);
 
-  const isBase64 = resolved.startsWith("data:image/");
+  const displaySrc = directSrc || resolved;
+
+  // Keep the parent's own background visible while an image is unresolved.
+  // Do not flash an unrelated default product image.
+  if (!displaySrc) return null;
+
+  const isBase64 = displaySrc.startsWith("data:image/");
 
   if (fill) {
-    return <Image src={resolved} alt={alt} fill className={className} priority={priority} unoptimized={isBase64 || unoptimized} />;
+    return <Image src={displaySrc} alt={alt} fill className={className} priority={priority} unoptimized={isBase64 || unoptimized} />;
   }
-  return <Image src={resolved} alt={alt} width={width || 100} height={height || 100} className={className} priority={priority} unoptimized={isBase64 || unoptimized} />;
+  return <Image src={displaySrc} alt={alt} width={width || 100} height={height || 100} className={className} priority={priority} unoptimized={isBase64 || unoptimized} />;
 }

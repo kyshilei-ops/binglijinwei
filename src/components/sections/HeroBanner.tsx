@@ -16,7 +16,7 @@ export function HeroBanner() {
   const banners = useCmsBanners();
 
   if (!banners.length) {
-    return <div className="w-full bg-gray-200 flex items-center justify-center text-gray-400" style={{ height: "clamp(380px, 36.46vw, 700px)" }}>No active banners</div>;
+    return <div className="w-full" style={{ height: "clamp(380px, 36.46vw, 700px)", backgroundColor: "#102e19" }} aria-hidden="true" />;
   }
 
   return (
@@ -34,7 +34,7 @@ export function HeroBanner() {
           <SwiperSlide key={slide.id}>
             <div className="relative flex flex-col sm:block h-auto sm:h-full">
               <div className="relative w-full shrink-0 sm:absolute sm:inset-0" style={{ aspectRatio: "1920 / 700", backgroundColor: "#102e19" }}>
-                <ResolvedImage src={slide.image_url} alt={slide.title} fill className="object-contain sm:object-cover" />
+                <ResolvedImage src={slide.image_url} alt={slide.title} fill priority={i === 0} className="object-contain sm:object-cover" />
               </div>
               <div className="hidden sm:block absolute inset-0 bg-black/40" />
               <div className="hero-banner-content relative flex flex-1 items-center sm:absolute sm:inset-0">
