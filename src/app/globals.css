@@ -49,6 +49,19 @@ body {
   background: #4caf50 !important;
 }
 
+/* Hero controls stay out of the way on compact screens. */
+.hero-banner .swiper-button-next,
+.hero-banner .swiper-button-prev {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .hero-banner .swiper-button-next,
+  .hero-banner .swiper-button-prev {
+    display: flex;
+  }
+}
+
 /* Container */
 .container {
   max-width: 1430px;
