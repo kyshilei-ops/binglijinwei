@@ -16,7 +16,7 @@ export function HeroBanner() {
   const banners = useCmsBanners();
 
   if (!banners.length) {
-    return <div className="w-full h-[500px] md:h-[600px] bg-gray-200 flex items-center justify-center text-gray-400">No active banners</div>;
+    return <div className="w-full aspect-[1920/700] min-h-[500px] md:min-h-[440px] max-h-[700px] bg-gray-200 flex items-center justify-center text-gray-400">No active banners</div>;
   }
 
   return (
@@ -28,7 +28,7 @@ export function HeroBanner() {
         pagination={{ clickable: true }}
         effect="fade"
         loop
-        className="w-full h-[500px] md:h-[600px]"
+        className="w-full aspect-[1920/700] min-h-[500px] md:min-h-[440px] max-h-[700px]"
       >
         {banners.map((slide, i) => (
           <SwiperSlide key={slide.id}>
