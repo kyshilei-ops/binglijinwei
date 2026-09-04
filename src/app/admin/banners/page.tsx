@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useLang } from "@/lib/LanguageContext";
 import { saveBanner, deleteBanner } from "@/lib/supabaseData";
 import { supabase } from "@/lib/supabase";
+import { SingleImageUploader } from "@/components/ui/SingleImageUploader";
 import { t } from "@/lib/i18n";
 
 interface BannerItem { id: number; title: string; subtitle: string; highlight: string; description: string; image_url: string; button1_label: string; button2_label: string; is_active: boolean; sort_order: number; }
@@ -20,12 +21,27 @@ export default function BannersPage() {
 
   useEffect(() => {
     if (sessionStorage.getItem("admin_auth") !== "true") { window.location.href = "/admin"; return; }
-    setBanners(JSON.parse(localStorage.getItem("cms_banners") || "null") || defaults);
+    supabase.from("banners").select("*").order("sort_order").then(({ data }: any) => {
+      if (data && data.length > 0) setBanners(data);
+      else setBanners(defaults);
+    });
   }, []);
 
-  const save = (b: BannerItem) => {
-    const u = editing && editing.id !== 0 ? banners.map((i) => (i.id === b.id ? b : i)) : [...banners, { ...b, id: Date.now(), is_active: true, sort_order: banners.length + 1 }];
-    setBanners(u); saveBanner(b).catch(console.error); setEditing(null);
+  const save = async (b: BannerItem) => {
+    try {
+      const { data } = await saveBanner(b as any);
+      if (data && data[0]) {
+        if (editing && editing.id !== 0) {
+          setBanners((prev: any) => prev.map((i: any) => i.id === b.id ? data[0] : i));
+        } else {
+          setBanners((prev: any) => [...prev, data[0]]);
+        }
+      }
+      setEditing(null);
+    } catch (e) {
+      console.error("Save failed:", e);
+      alert("保存失败，请重试");
+    }
   };
   const toggle = (id: number) => {
     const updated = banners.map((x) => x.id === id ? { ...x, is_active: !x.is_active } : x);
@@ -65,8 +81,18 @@ export default function BannersPage() {
             <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save(editing); }}>
               {fields.map((f) => (
                 <div key={f.key}>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">{f.label}</label>
-                  <input type="text" value={(editing as any)[f.key] || ""} onChange={(e) => setEditing({ ...editing, [f.key]: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-green-500 outline-none" />
+                  {f.key === "image_url" ? (
+                    <SingleImageUploader
+                      value={(editing as any).image_url || ""}
+                      onChange={(url) => setEditing({ ...editing, image_url: url })}
+                      label={f.label}
+                    />
+                  ) : (
+                    <>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">{f.label}</label>
+                      <input type="text" value={(editing as any)[f.key] || ""} onChange={(e) => setEditing({ ...editing, [f.key]: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-green-500 outline-none" />
+                    </>
+                  )}
                 </div>
               ))}
               <div className="flex gap-2 pt-2">
