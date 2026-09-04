@@ -1,8 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { safeImageUrl } from "@/lib/imageUrl";
+import { BlogCover } from "@/components/ui/BlogCover";
 import { useLang } from "@/lib/LanguageContext";
 import { t } from "@/lib/i18n";
 import { localizedField } from "@/lib/localizedFields";
@@ -22,8 +21,8 @@ export function BlogSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {posts.slice(0, 3).map((post) => (
             <article key={post.id} className="group bg-white border border-[#e5e5e5] rounded-lg overflow-hidden hover:shadow-lg transition-all">
-              <Link href={`/blog/${post.id}`} className="relative block h-56 overflow-hidden">
-                <Image src={safeImageUrl(post.image_url)} alt={post.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+              <Link href={`/blog/${post.id}`} className="relative block">
+                <BlogCover src={post.image_url} alt={lang === "zh" ? post.title : (post.title_en || post.title)} className="h-56" />
                 <span className="absolute top-4 left-4 bg-[#4caf50] text-white text-xs font-medium px-3 py-1 rounded">{lang === "zh" ? post.category : (post.category_en || post.category)}</span>
               </Link>
               <div className="p-6">

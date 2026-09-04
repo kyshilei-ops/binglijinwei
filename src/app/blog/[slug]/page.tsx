@@ -3,12 +3,11 @@
 import { useParams } from "next/navigation";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { safeImageUrl } from "@/lib/imageUrl";
+import { BlogCover } from "@/components/ui/BlogCover";
 import { useCmsBlog } from "@/lib/supabaseData";
 import { useLang } from "@/lib/LanguageContext";
 import { t } from "@/lib/i18n";
 import { localizedField } from "@/lib/localizedFields";
-import Image from "next/image";
 import Link from "next/link";
 
 export default function BlogPostPage() {
@@ -57,9 +56,7 @@ export default function BlogPostPage() {
             </div>
 
             {post.image_url && (
-              <div className="relative h-80 md:h-96 rounded-lg overflow-hidden mb-8">
-                <Image src={safeImageUrl(post.image_url)} alt={post.title} fill className="object-cover" />
-              </div>
+              <BlogCover src={post.image_url} alt={lang === "zh" ? post.title : (post.title_en || post.title)} className="h-80 md:h-96 rounded-lg mb-8" />
             )}
 
             <div className="blog-content max-w-none text-[#4a5568] leading-relaxed text-lg">

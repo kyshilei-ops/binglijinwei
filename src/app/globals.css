@@ -84,6 +84,47 @@ body {
 .blog-content li { margin: 0.45rem 0; }
 .blog-content strong { color: #1a202c; }
 
+.group:hover .blog-cover-image {
+  transform: scale(1.05);
+}
+
+.blog-product-cover {
+  isolation: isolate;
+  background: linear-gradient(135deg, #f7faef 0%, #e6f0d4 55%, #d2e5ae 100%);
+}
+
+.blog-product-cover--pump {
+  background: linear-gradient(135deg, #eef5e4 0%, #dcebd0 52%, #bdd99e 100%);
+}
+
+.blog-product-cover::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  width: 15rem;
+  height: 15rem;
+  right: -4rem;
+  bottom: -7rem;
+  border: 2.2rem solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+}
+
+.blog-product-cover::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background-image: radial-gradient(rgba(76, 175, 80, 0.22) 1px, transparent 1px);
+  background-size: 12px 12px;
+  opacity: 0.45;
+}
+
+.blog-product-cover .blog-cover-image {
+  z-index: 1;
+  padding: 0.65rem;
+  filter: drop-shadow(0 14px 14px rgba(21, 47, 21, 0.25));
+}
+
 /* Hero controls stay out of the way on compact screens. */
 .hero-banner .swiper-button-next,
 .hero-banner .swiper-button-prev {

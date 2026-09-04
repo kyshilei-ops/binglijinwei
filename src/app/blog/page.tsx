@@ -2,12 +2,11 @@
 
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { safeImageUrl } from "@/lib/imageUrl";
+import { BlogCover } from "@/components/ui/BlogCover";
 import { useCmsBlog } from "@/lib/supabaseData";
 import { useLang } from "@/lib/LanguageContext";
 import { t } from "@/lib/i18n";
 import { localizedField } from "@/lib/localizedFields";
-import Image from "next/image";
 import Link from "next/link";
 
 export default function BlogPage() {
@@ -28,8 +27,8 @@ export default function BlogPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {posts.map((post) => (
                 <Link key={post.id} href={`/blog/${post.id}`} className="group bg-white border border-[#e5e5e5] rounded-lg overflow-hidden hover:shadow-lg transition-all">
-                  <div className="relative h-56 overflow-hidden">
-                    <Image src={safeImageUrl(post.image_url)} alt={post.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <div className="relative overflow-hidden">
+                    <BlogCover src={post.image_url} alt={lang === "zh" ? post.title : (post.title_en || post.title)} className="h-56" />
                     <span className="absolute top-4 left-4 bg-[#4caf50] text-white text-xs font-medium px-3 py-1 rounded">{lang === "zh" ? post.category : (post.category_en || post.category)}</span>
                   </div>
                   <div className="p-6">
