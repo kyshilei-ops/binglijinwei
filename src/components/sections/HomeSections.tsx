@@ -1,4 +1,5 @@
 "use client";
+import { useCategoryCovers } from "@/lib/categoryCovers";
 
 import { useMemo } from "react";
 import Link from "next/link";
@@ -54,6 +55,7 @@ export function ServiceFeatures() {
 export function CategoriesSection() {
   const { lang } = useLang();
   const products = useCmsProducts();
+  const covers = useCategoryCovers();
 
   const categories = useMemo(() => {
     const catMap = new Map<string, { count: number; image: string; nameZh: string; nameEn: string }>();
@@ -62,6 +64,7 @@ export function CategoriesSection() {
       const existing = catMap.get(p.category);
       if (existing) {
         existing.count++;
+        if (covers[p.category] === p.id && p.image_url) existing.image = p.image_url;
       } else {
         catMap.set(p.category, {
           count: 1,
@@ -77,7 +80,7 @@ export function CategoriesSection() {
       image: data.image,
       count: data.count,
     }));
-  }, [products, lang]);
+  }, [products, lang, covers]);
 
   // Fallback if no products
   if (categories.length === 0) return null;

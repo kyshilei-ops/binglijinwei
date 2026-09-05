@@ -8,26 +8,29 @@ import { SingleImageUploader } from "@/components/ui/SingleImageUploader";
 import { t } from "@/lib/i18n";
 
 interface BannerItem { id: number; title: string; subtitle: string; highlight: string; description: string; image_url: string; button1_label: string; button2_label: string; is_active: boolean; sort_order: number; }
-const defaults: BannerItem[] = [
-  { id: 1, title: "让您的草坪", subtitle: "专业草坪护理", highlight: "全年美丽如新", description: "为住宅和商业物业提供专业的割草和园艺护理服务。", image_url: "/images/banners/Banner-1.jpg", button1_label: "立即选购", button2_label: "联系我们", is_active: true, sort_order: 1 },
-  { id: 2, title: "强劲设备助力", subtitle: "优质园艺工具", highlight: "您的花园", description: "为专业人士和家庭用户提供顶级割草机、打草机和园艺工具。", image_url: "/images/banners/banner-2.jpg", button1_label: "查看产品", button2_label: "了解更多", is_active: true, sort_order: 2 },
-  { id: 3, title: "我们精心呵护", subtitle: "专家服务", highlight: "您的户外空间", description: "可靠、实惠、专业的草坪维护服务，值得您信赖。", image_url: "/images/banners/banner-3.jpg", button1_label: "立即开始", button2_label: "我们的服务", is_active: true, sort_order: 3 },
-];
 
 export default function BannersPage() {
   const { lang } = useLang();
   const [banners, setBanners] = useState<BannerItem[]>([]);
   const [editing, setEditing] = useState<BannerItem | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (sessionStorage.getItem("admin_auth") !== "true") { window.location.href = "/admin"; return; }
-    supabase.from("banners").select("*").order("sort_order").then(({ data }: any) => {
-      if (data && data.length > 0) setBanners(data);
-      else setBanners(defaults);
+    supabase.from("banners").select("*").order("sort_order").then(({ data, error }) => {
+      if (error) setError(error.message);
+      else setBanners(data || []);
+      setLoading(false);
     });
   }, []);
 
   const save = async (b: BannerItem) => {
+    if (saving || uploading) return;
+    if (!b.image_url) { setError("请先上传横幅图片"); return; }
+    setSaving(true); setError("");
     try {
       const { data } = await saveBanner(b as any);
       if (data && data[0]) {
@@ -40,21 +43,28 @@ export default function BannersPage() {
       setEditing(null);
     } catch (e) {
       console.error("Save failed:", e);
-      alert("保存失败，请重试");
-    }
+      setError(`保存失败：${(e as Error).message}`);
+    } finally { setSaving(false); }
   };
-  const toggle = (id: number) => {
+  const toggle = async (id: number) => {
+    if (saving) return;
     const updated = banners.map((x) => x.id === id ? { ...x, is_active: !x.is_active } : x);
     const banner = updated.find((x) => x.id === id);
-    setBanners(updated);
-    if (banner) saveBanner(banner).catch(console.error);
+    setSaving(true);
+    try { if (banner) await saveBanner(banner); setBanners(updated); }
+    catch (e) { setError(`保存失败：${(e as Error).message}`); }
+    finally { setSaving(false); }
   };
-  const remove = (id: number) => {
-    setBanners((prev: any) => prev.filter((x: any) => x.id !== id));
-    deleteBanner(id).catch(console.error);
+  const remove = async (id: number) => {
+    if (saving) return;
+    if (!confirm("确定删除这张横幅吗？")) return;
+    setSaving(true);
+    try { await deleteBanner(id); setBanners(prev => prev.filter(x => x.id !== id)); }
+    catch (e) { setError(`删除失败：${(e as Error).message}`); }
+    finally { setSaving(false); }
   };
 
-  if (!banners.length) return null;
+  if (loading) return <p>加载中…</p>;
 
   const fields = [
     { label: t("admin_title_field", lang), key: "title" },
@@ -62,12 +72,15 @@ export default function BannersPage() {
     { label: t("ban_highlight", lang), key: "highlight" },
     { label: t("ban_description", lang), key: "description" },
     { label: t("admin_image_url", lang), key: "image_url" },
-    { label: t("ban_btn1_label", lang), key: "button1_label" },
-    { label: t("ban_btn2_label", lang), key: "button2_label" },
+    { label: "英文标题", key: "title_en" },
+    { label: "英文副标题", key: "subtitle_en" },
+    { label: "英文强调文字", key: "highlight_en" },
+    { label: "英文描述", key: "description_en" },
   ];
 
   return (
     <div>
+      {!editing && error && <p role="alert" className="text-red-600 mb-4">{error}</p>}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">{t("ban_title", lang)}</h1>
         <button onClick={() => setEditing({ id: 0, title: "", subtitle: "", highlight: "", description: "", image_url: "", button1_label: "立即选购", button2_label: "联系我们", is_active: true, sort_order: 0 })} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
@@ -79,12 +92,14 @@ export default function BannersPage() {
           <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-auto">
             <h2 className="text-lg font-semibold mb-4">{editing.id ? t("ban_edit", lang) : t("ban_add", lang)}</h2>
             <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save(editing); }}>
+              {error && <p role="alert" className="text-red-600">{error}</p>}
               {fields.map((f) => (
                 <div key={f.key}>
                   {f.key === "image_url" ? (
                     <SingleImageUploader
                       value={(editing as any).image_url || ""}
-                      onChange={(url) => setEditing({ ...editing, image_url: url })}
+                      onChange={(url) => setEditing(current => current ? { ...current, image_url: url } : current)}
+                      onUploadingChange={setUploading}
                       label={f.label}
                     />
                   ) : (
@@ -95,9 +110,12 @@ export default function BannersPage() {
                   )}
                 </div>
               ))}
+              <p className="text-xs text-gray-500">图片建议 1920 × 700 像素，JPG、PNG 或 WebP，不超过 5MB。按钮固定为“查看产品”和“联系我们”。</p>
+              <label className="block text-sm">排序（数字越小越靠前）<input type="number" value={editing.sort_order} onChange={e => setEditing({ ...editing, sort_order: Number(e.target.value) || 0 })} className="border rounded p-2 ml-2 w-24" /></label>
+              <label className="flex gap-2 text-sm"><input type="checkbox" checked={editing.is_active} onChange={e => setEditing({ ...editing, is_active: e.target.checked })} />在首页显示</label>
               <div className="flex gap-2 pt-2">
-                <button type="submit" className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-md text-sm font-medium">{t("admin_save", lang)}</button>
-                <button type="button" onClick={() => setEditing(null)} className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-md text-sm font-medium">{t("admin_cancel", lang)}</button>
+                <button disabled={saving || uploading} type="submit" className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-md text-sm font-medium disabled:opacity-50">{uploading ? "图片上传中…" : saving ? "保存中…" : t("admin_save", lang)}</button>
+                <button disabled={saving || uploading} type="button" onClick={() => setEditing(null)} className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-md text-sm font-medium">{t("admin_cancel", lang)}</button>
               </div>
             </form>
           </div>

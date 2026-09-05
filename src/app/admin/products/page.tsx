@@ -6,6 +6,7 @@ import { saveProduct, deleteProduct } from "@/lib/supabaseData";
 import { supabase } from "@/lib/supabase";
 import { MultiImageUploader } from "@/components/ui/MultiImageUploader";
 import { t } from "@/lib/i18n";
+import { useCategoryCovers, saveCategoryCover } from "@/lib/categoryCovers";
 
 interface ProductItem { id: number; name: string; name_en: string; price: number; old_price: number | null; image_url: string; images: string; category: string; category_en: string; badge: string; rating: number; description: string; description_en: string; specs: string; is_featured: boolean; }
 const defaults: ProductItem[] = [
@@ -23,6 +24,18 @@ export default function ProductsPage() {
   const { lang } = useLang();
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [editing, setEditing] = useState<ProductItem | null>(null);
+  const covers = useCategoryCovers();
+  const [coverBusy, setCoverBusy] = useState(false);
+
+  const setCover = async (product: ProductItem) => {
+    setCoverBusy(true);
+    try {
+      await saveCategoryCover(product.category, product.id);
+      alert(lang === "zh" ? "分类封面已保存到云端" : "Category cover saved");
+    } catch (error) {
+      alert(`${lang === "zh" ? "分类封面保存失败：" : "Could not save cover: "}${(error as Error).message}`);
+    } finally { setCoverBusy(false); }
+  };
 
   useEffect(() => {
     if (sessionStorage.getItem("admin_auth") !== "true") { window.location.href = "/admin"; return; }
@@ -78,6 +91,17 @@ export default function ProductsPage() {
         <button onClick={() => setEditing({ id: 0, name: "", name_en: "", price: 0, old_price: null, image_url: "", category: "", category_en: "", badge: "", rating: 5, description: "", description_en: "", specs: "", images: "[]", is_featured: false })} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
           <i className="fas fa-plus mr-2"></i>{t("prod_add", lang)}
         </button>
+      </div>
+      <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
+        <h2 className="font-semibold mb-2">{lang === "zh" ? "首页分类封面" : "Homepage category covers"}</h2>
+        <p className="text-sm text-gray-500 mb-3">{lang === "zh" ? "选择产品后点击“设为分类封面”，首页将使用该产品主图。" : "Choose a product and set its main image as the category cover."}</p>
+        <div className="flex flex-wrap gap-3">
+          {products.filter(p => p.category && p.image_url).map(p => (
+            <button key={p.id} type="button" disabled={coverBusy} onClick={() => setCover(p)} className="border rounded-md px-3 py-2 text-sm disabled:opacity-50" style={{ borderColor: covers[p.category] === p.id ? "#16a34a" : "#d1d5db" }}>
+              {p.name} · {covers[p.category] === p.id ? (lang === "zh" ? "已设为分类封面" : "Selected cover") : (lang === "zh" ? "设为分类封面" : "Set as category cover")}
+            </button>
+          ))}
+        </div>
       </div>
       {editing && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">

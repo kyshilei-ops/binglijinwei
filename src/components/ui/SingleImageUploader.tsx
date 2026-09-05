@@ -9,9 +9,10 @@ interface SingleImageUploaderProps {
   onChange: (url: string) => void;
   label?: string;
   bucket?: string;
+  onUploadingChange?: (uploading: boolean) => void;
 }
 
-export function SingleImageUploader({ value, onChange, label, bucket }: SingleImageUploaderProps) {
+export function SingleImageUploader({ value, onChange, label, bucket, onUploadingChange }: SingleImageUploaderProps) {
   const { lang } = useLang();
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -22,15 +23,19 @@ export function SingleImageUploader({ value, onChange, label, bucket }: SingleIm
     if (!file.type.startsWith("image/")) return;
     if (file.size > 5 * 1024 * 1024) { alert(lang === "zh" ? "图片不能超过5MB" : "Image must be under 5MB"); return; }
     setUploading(true);
+    onUploadingChange?.(true);
     try {
       const url = await uploadImageToSupabase(file, bucket);
       onChange(url);
     } catch (e) {
       console.error("Upload failed:", e);
-      alert(lang === "zh" ? "上传失败，请重试" : "Upload failed, please retry");
+      alert(`${lang === "zh" ? "上传失败：" : "Upload failed: "}${(e as Error).message}`);
+    } finally {
+      setUploading(false);
+      onUploadingChange?.(false);
+      if (fileRef.current) fileRef.current.value = "";
     }
-    setUploading(false);
-  }, [onChange, lang, bucket]);
+  }, [onChange, lang, bucket, onUploadingChange]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();

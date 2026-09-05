@@ -110,12 +110,24 @@ const defaultSettings: SettingsRow = {
 
 // ─── Save helpers (for admin pages) ───
 export async function saveBanner(item: Partial<BannerRow>) {
-  const { data: max } = await supabase.from("banners").select("id").order("id", { ascending: false }).limit(1);
+  const { data: max, error: readError } = await supabase.from("banners").select("id").order("id", { ascending: false }).limit(1);
+  if (readError) throw readError;
   const nextId = max?.[0]?.id ? max[0].id + 1 : 1;
-  const toSave = { ...item, id: item.id || nextId };
-  return supabase.from("banners").upsert(toSave, { onConflict: "id" }).select();
+  const { title, title_en, subtitle, subtitle_en, highlight, highlight_en, description, description_en, image_url, is_active, sort_order } = item;
+  const toSave = { id: item.id || nextId, title, title_en, subtitle, subtitle_en, highlight, highlight_en, description, description_en, image_url, is_active, sort_order };
+  const result = await supabase.from("banners").upsert(toSave, { onConflict: "id" }).select();
+  if (result.error) throw result.error;
+  if (!result.data?.length) throw new Error("横幅未保存，请重试");
+  tableCache.delete("banners");
+  return result;
 }
-export async function deleteBanner(id: number) { return supabase.from("banners").delete().eq("id", id); }
+export async function deleteBanner(id: number) {
+  const result = await supabase.from("banners").delete().eq("id", id).select("id");
+  if (result.error) throw result.error;
+  if (!result.data?.length) throw new Error("横幅删除失败，请刷新重试");
+  tableCache.delete("banners");
+  return result;
+}
 
 export async function saveProduct(item: Partial<ProductRow>) {
   const { data: max } = await supabase.from("products").select("id").order("id", { ascending: false }).limit(1);
