@@ -13,6 +13,10 @@ const T = { bg: "#102e19", primary: "#9cc211", primaryHover: "#b3e014", dark: "#
 export function TopBar() {
   const { lang } = useLang();
   const settings = useCmsSettings();
+  const phoneText = settings.phone || (lang === "zh" ? "联系电话" : "Phone");
+  const hoursText = lang === "zh"
+    ? (settings.working_hours || "工作时间")
+    : (settings.working_hours_en || settings.working_hours || "Working Hours");
   const socialLinks = [
     { icon: "facebook-f", href: settings.facebook_url, label: "Facebook" },
     { icon: "x-twitter", href: settings.twitter_url, label: "X" },
@@ -22,15 +26,18 @@ export function TopBar() {
   return (
     <div className="text-white text-sm" style={{ backgroundColor: T.bg }}>
       <div className="w-full flex justify-between items-center py-3 px-4 lg:py-4 lg:px-4">
-        <div className="flex items-center gap-8">
-          {settings.phone && <a href={`tel:${settings.phone}`} className="flex items-center gap-2 font-semibold" style={{ fontFamily: "'Rubik', sans-serif", color: T.primary }}>
+        <div className="flex items-center gap-4 sm:gap-8">
+          {settings.phone ? <a href={`tel:${settings.phone}`} className="flex items-center gap-2 font-semibold" style={{ fontFamily: "'Rubik', sans-serif", color: T.primary }}>
             <i className="fas fa-phone text-lg"></i>
-            <span>{settings.phone}</span>
-          </a>}
-          {(settings.working_hours || settings.working_hours_en) && <span className="flex items-center gap-2" style={{ fontFamily: "'Rubik', sans-serif" }}>
-            <i className="far fa-clock"></i>
-            {lang === "zh" ? settings.working_hours : (settings.working_hours_en || settings.working_hours)}
+            <span>{phoneText}</span>
+          </a> : <span className="flex items-center gap-2 font-semibold" style={{ fontFamily: "'Rubik', sans-serif", color: T.primary }}>
+            <i className="fas fa-phone text-lg"></i>
+            <span>{phoneText}</span>
           </span>}
+          <span className="flex items-center gap-2" style={{ fontFamily: "'Rubik', sans-serif" }}>
+            <i className="far fa-clock"></i>
+            <span>{hoursText}</span>
+          </span>
         </div>
         <div className="flex items-center gap-3">
           {socialLinks.map((item) => (
