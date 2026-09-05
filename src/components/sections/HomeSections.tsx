@@ -34,7 +34,7 @@ export function ServiceFeatures() {
   ];
 
   return (
-    <section className="pt-6 pb-0 sm:pt-0 sm:-mt-16 lg:-mt-20 relative z-10">
+    <section className="pt-6 pb-0 relative z-10">
       <div className="container">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {services.map((s, i) => (
@@ -92,9 +92,9 @@ export function CategoriesSection() {
           <p className="section-subtitle">{t("cat_subtitle", lang)}</p>
           <h2 className="section-title">{t("cat_title", lang)}</h2>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="category-card-list">
           {categories.map((cat) => (
-            <Link key={cat.key} href={`/products?category=${encodeURIComponent(cat.key)}`} className="group relative rounded-lg overflow-hidden border border-[#e5e5e5] hover:shadow-lg transition-all">
+            <Link key={cat.key} href={`/products?category=${encodeURIComponent(cat.key)}`} className="category-card group relative rounded-lg overflow-hidden border border-[#e5e5e5] hover:shadow-lg transition-all">
               <div className="relative h-48">
                 <ResolvedImage src={cat.image} alt={cat.name} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-300" />
                 <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
