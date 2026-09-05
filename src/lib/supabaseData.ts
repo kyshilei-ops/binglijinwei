@@ -1,22 +1,55 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback, type Dispatch, type SetStateAction } from "react";
 import { supabase } from "./supabase";
 
-// Super simple: fetch all once, then pass around. Admin pages push updates.
+// Share short-lived table snapshots so sections using the same table do not
+// issue duplicate requests or briefly disappear during client-side navigation.
+const tableCache = new Map<string, { rows: unknown[]; fetchedAt: number }>();
+const tableRequests = new Map<string, Promise<unknown[]>>();
+const CACHE_TTL = 15_000;
+
+function fetchTable(table: string) {
+  const pending = tableRequests.get(table);
+  if (pending) return pending;
+
+  const request = Promise.resolve(
+    supabase.from(table).select("*").order("id").then(({ data: rows, error }) => {
+      if (error) throw error;
+      const result = rows || [];
+      tableCache.set(table, { rows: result, fetchedAt: Date.now() });
+      return result as unknown[];
+    }),
+  ).finally(() => tableRequests.delete(table));
+
+  tableRequests.set(table, request);
+  return request;
+}
 
 // ─── Generic fetcher with React state ───
 function useTable<T>(table: string) {
-  const [data, setData] = useState<T[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cached = tableCache.get(table);
+  const [data, setLocalData] = useState<T[]>(() => (cached?.rows as T[] | undefined) || []);
+  const [loading, setLoading] = useState(!cached);
 
   useEffect(() => {
     let cancelled = false;
-    supabase.from(table).select("*").order("id").then(({ data: rows, error }: any) => {
-      if (!cancelled && rows) setData(rows as T[]);
-      setLoading(false);
-    });
+    const current = tableCache.get(table);
+    if (current && Date.now() - current.fetchedAt < CACHE_TTL) return () => { cancelled = true; };
+
+    fetchTable(table)
+      .then((rows) => { if (!cancelled) setLocalData(rows as T[]); })
+      .catch((error) => console.error(`Could not load ${table}:`, error))
+      .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
+  }, [table]);
+
+  const setData: Dispatch<SetStateAction<T[]>> = useCallback((next) => {
+    setLocalData((current) => {
+      const rows = typeof next === "function" ? next(current) : next;
+      tableCache.set(table, { rows, fetchedAt: Date.now() });
+      return rows;
+    });
   }, [table]);
 
   return { data, setData, loading };
@@ -94,7 +127,8 @@ export async function deleteProduct(id: number) { return supabase.from("products
 
 export async function saveBlog(item: Partial<BlogRow>) {
   if (item.id) return supabase.from("blog_posts").upsert(item).select();
-  const { id: _id, ...newItem } = item;
+  const newItem = { ...item };
+  delete newItem.id;
   return supabase.from("blog_posts").insert(newItem).select();
 }
 export async function deleteBlog(id: number) { return supabase.from("blog_posts").delete().eq("id", id); }
@@ -120,6 +154,8 @@ export function notifyCmsDataChanged() {
   // Data refreshes on next render via Supabase fetch
 }
 export function saveToStorage(key: string, data: unknown) {
+  void key;
+  void data;
   // No-op: data saved via Supabase
 }
 

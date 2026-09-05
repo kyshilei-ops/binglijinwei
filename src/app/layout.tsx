@@ -3,8 +3,10 @@ import { Providers } from "@/components/Providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "LawnMover - 专业草坪护理服务",
-  description: "专业草坪修剪和花园护理服务。优质设备，专家服务。",
+  metadataBase: new URL("https://www.cncqbljw.com"),
+  title: "秉立锦为 | 微耕机与汽油机水泵",
+  description: "秉立锦为专注于微耕机、汽油机水泵等小型农业机械，为客户提供可靠的产品、选型支持与售后服务。",
+  keywords: ["秉立锦为", "微耕机", "汽油机水泵", "农业机械", "农机设备"],
 };
 
 export default function RootLayout({
@@ -13,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh" className="h-full">
+    <html lang="zh-CN" className="h-full">
       <head>
         <link
           rel="stylesheet"

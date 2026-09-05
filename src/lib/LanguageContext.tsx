@@ -20,8 +20,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const saved = localStorage.getItem("site_lang") as Lang | null;
-    if (saved === "en" || saved === "zh") setLangState(saved);
+    if (saved === "en" || saved === "zh") queueMicrotask(() => setLangState(saved));
   }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+  }, [lang]);
 
   const setLang = (l: Lang) => {
     setLangState(l);

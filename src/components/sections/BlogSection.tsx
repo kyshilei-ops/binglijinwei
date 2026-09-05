@@ -4,8 +4,8 @@ import Link from "next/link";
 import { BlogCover } from "@/components/ui/BlogCover";
 import { useLang } from "@/lib/LanguageContext";
 import { t } from "@/lib/i18n";
-import { localizedField } from "@/lib/localizedFields";
 import { useCmsBlog } from "@/lib/supabaseData";
+import { localizedAuthor, localizedBlogCategory } from "@/lib/contentLocalization";
 
 export function BlogSection() {
   const { lang } = useLang();
@@ -23,25 +23,25 @@ export function BlogSection() {
             <article key={post.id} className="group bg-white border border-[#e5e5e5] rounded-lg overflow-hidden hover:shadow-lg transition-all">
               <Link href={`/blog/${post.id}`} className="relative block">
                 <BlogCover src={post.image_url} alt={lang === "zh" ? post.title : (post.title_en || post.title)} className="h-56" />
-                <span className="absolute top-4 left-4 bg-[#4caf50] text-white text-xs font-medium px-3 py-1 rounded">{lang === "zh" ? post.category : (post.category_en || post.category)}</span>
+                <span className="absolute top-4 left-4 bg-[#4caf50] text-white text-xs font-medium px-3 py-1 rounded">{localizedBlogCategory(post.category, post.category_en, lang)}</span>
               </Link>
               <div className="p-6">
                 <div className="flex items-center gap-4 text-xs text-[#4a5568] mb-3">
                   <span><i className="far fa-calendar mr-1"></i> {post.published_at}</span>
-                  <span><i className="far fa-user mr-1"></i> {localizedField(post.author, lang)}</span>
+                  <span><i className="far fa-user mr-1"></i> {localizedAuthor(post.author, lang)}</span>
                 </div>
                 <h3 className="text-lg font-semibold text-[#1a202c] mb-2 group-hover:text-[#4caf50] transition-colors line-clamp-2">
                   <Link href={`/blog/${post.id}`}>{lang === "zh" ? post.title : (post.title_en || post.title)}</Link>
                 </h3>
                 <p className="text-sm text-[#4a5568] leading-relaxed mb-4 line-clamp-2">{lang === "zh" ? post.excerpt : (post.excerpt_en || post.excerpt)}</p>
-                <Link href="#" className="text-sm font-medium text-[#4caf50] hover:text-[#388e3c] transition-colors inline-flex items-center gap-1">
+                <Link href={`/blog/${post.id}`} className="text-sm font-medium text-[#4caf50] hover:text-[#388e3c] transition-colors inline-flex items-center gap-1">
                   {t("blog_read_more", lang)} <i className="fas fa-arrow-right text-xs"></i>
                 </Link>
               </div>
             </article>
           ))}
         </div>
-        {posts.length === 0 && <p className="text-center text-gray-400 py-10">No posts yet.</p>}
+        {posts.length === 0 && <p className="text-center text-gray-400 py-10">{lang === "zh" ? "还没有文章。" : "No posts yet."}</p>}
       </div>
     </section>
   );

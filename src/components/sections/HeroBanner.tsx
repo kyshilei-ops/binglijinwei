@@ -27,14 +27,14 @@ export function HeroBanner() {
         navigation
         pagination={{ clickable: true }}
         effect="fade"
-        loop
+        loop={banners.length > 1}
         className="hero-banner w-full"
       >
         {banners.map((slide, i) => (
           <SwiperSlide key={slide.id}>
             <div className="relative flex flex-col sm:block h-auto sm:h-full">
               <div className="relative w-full shrink-0 sm:absolute sm:inset-0" style={{ aspectRatio: "1920 / 700", backgroundColor: "#102e19" }}>
-                <ResolvedImage src={slide.image_url} alt={slide.title} fill priority={i === 0} className="object-contain sm:object-cover" />
+                <ResolvedImage src={slide.image_url} alt="" fill priority={i === 0} sizes="100vw" quality={72} className="object-contain sm:object-cover" />
               </div>
               <div className="hidden sm:block absolute inset-0 bg-black/40" />
               <div className="hero-banner-content relative flex flex-1 items-center sm:absolute sm:inset-0">

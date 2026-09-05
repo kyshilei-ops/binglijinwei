@@ -6,7 +6,8 @@ import { BlogCover } from "@/components/ui/BlogCover";
 import { useCmsBlog } from "@/lib/supabaseData";
 import { useLang } from "@/lib/LanguageContext";
 import { t } from "@/lib/i18n";
-import { localizedField } from "@/lib/localizedFields";
+import { localizedAuthor, localizedBlogCategory } from "@/lib/contentLocalization";
+import { LocalizedPageMetadata } from "@/components/ui/LocalizedPageMetadata";
 import Link from "next/link";
 
 export default function BlogPage() {
@@ -16,6 +17,12 @@ export default function BlogPage() {
   return (
     <>
       <Header />
+      <LocalizedPageMetadata
+        titleZh="使用指南与资讯"
+        titleEn="Guides & News"
+        descriptionZh="了解微耕机、汽油机水泵的使用技巧、安全注意事项与日常保养方法。"
+        descriptionEn="Practical operation, safety and maintenance guidance for micro tillers and gasoline water pumps."
+      />
       <main className="flex-1">
         <section className="py-16 bg-gradient-to-r from-[#1a202c] to-[#2d3748] text-center">
           <h1 className="text-4xl font-bold text-white">{t("nav_blog", lang)}</h1>
@@ -29,12 +36,12 @@ export default function BlogPage() {
                 <Link key={post.id} href={`/blog/${post.id}`} className="group bg-white border border-[#e5e5e5] rounded-lg overflow-hidden hover:shadow-lg transition-all">
                   <div className="relative overflow-hidden">
                     <BlogCover src={post.image_url} alt={lang === "zh" ? post.title : (post.title_en || post.title)} className="h-56" />
-                    <span className="absolute top-4 left-4 bg-[#4caf50] text-white text-xs font-medium px-3 py-1 rounded">{lang === "zh" ? post.category : (post.category_en || post.category)}</span>
+                    <span className="absolute top-4 left-4 bg-[#4caf50] text-white text-xs font-medium px-3 py-1 rounded">{localizedBlogCategory(post.category, post.category_en, lang)}</span>
                   </div>
                   <div className="p-6">
                     <div className="flex items-center gap-4 text-xs text-gray-400 mb-3">
                       <span><i className="far fa-calendar mr-1"></i>{post.published_at}</span>
-                      <span><i className="far fa-user mr-1"></i>{localizedField(post.author, lang)}</span>
+                      <span><i className="far fa-user mr-1"></i>{localizedAuthor(post.author, lang)}</span>
                     </div>
                     <h3 className="text-lg font-semibold text-[#1a202c] mb-2 group-hover:text-[#4caf50] transition-colors">{lang === "zh" ? post.title : (post.title_en || post.title)}</h3>
                     <p className="text-sm text-[#4a5568] line-clamp-2">{lang === "zh" ? post.excerpt : (post.excerpt_en || post.excerpt)}</p>
@@ -42,7 +49,7 @@ export default function BlogPage() {
                 </Link>
               ))}
             </div>
-            {posts.length === 0 && <p className="text-center text-gray-400 py-20">No posts yet.</p>}
+            {posts.length === 0 && <p className="text-center text-gray-400 py-20">{lang === "zh" ? "还没有文章。" : "No posts yet."}</p>}
           </div>
         </section>
       </main>

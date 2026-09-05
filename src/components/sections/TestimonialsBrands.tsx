@@ -10,7 +10,12 @@ import { useCmsTestimonials, useCmsBrands } from "@/lib/supabaseData";
 
 export function TestimonialsSection() {
   const { lang } = useLang();
-  const testimonials = useCmsTestimonials();
+  const testimonials = useCmsTestimonials().filter((item) => {
+    const demoName = ["张伟", "李娜", "王强", "John Smith", "Sarah Johnson", "Mike Williams"].includes(item.name);
+    return !(demoName && item.image_url.includes("/images/testimonials/testi-"));
+  });
+
+  if (testimonials.length === 0) return null;
 
   return (
     <section className="py-20 bg-white">
@@ -20,7 +25,7 @@ export function TestimonialsSection() {
           <h2 className="section-title">{t("testi_title", lang)}</h2>
         </div>
         {testimonials.length > 0 ? (
-          <Swiper modules={[Autoplay, Navigation]} autoplay={{ delay: 4000 }} navigation loop slidesPerView={1} breakpoints={{ 768: { slidesPerView: 2 }, 1024: { slidesPerView: 3 } }} spaceBetween={30} className="max-w-5xl">
+          <Swiper modules={[Autoplay, Navigation]} autoplay={{ delay: 4000 }} navigation loop={testimonials.length > 3} slidesPerView={1} breakpoints={{ 768: { slidesPerView: 2 }, 1024: { slidesPerView: 3 } }} spaceBetween={30} className="max-w-5xl">
             {testimonials.map((test) => (
               <SwiperSlide key={test.id}>
                 <div className="bg-[#f7f7f7] rounded-lg p-8 text-center">
@@ -45,7 +50,9 @@ export function TestimonialsSection() {
 
 export function BrandsSection() {
   const { lang } = useLang();
-  const brands = useCmsBrands();
+  const brands = useCmsBrands().filter((item) => !(item.name.startsWith("Brand ") && item.image_url.includes("/images/brands/b-")));
+
+  if (brands.length === 0) return null;
 
   return (
     <section className="py-16 bg-[#f7f7f7]">
@@ -55,7 +62,7 @@ export function BrandsSection() {
           <h2 className="section-title">{t("brands_title", lang)}</h2>
         </div>
         {brands.length > 0 ? (
-          <Swiper modules={[Autoplay]} autoplay={{ delay: 3000 }} loop slidesPerView={2} breakpoints={{ 640: { slidesPerView: 3 }, 1024: { slidesPerView: 6 } }} spaceBetween={30}>
+          <Swiper modules={[Autoplay]} autoplay={{ delay: 3000 }} loop={brands.length > 6} slidesPerView={2} breakpoints={{ 640: { slidesPerView: 3 }, 1024: { slidesPerView: 6 } }} spaceBetween={30}>
             {brands.map((b) => (
               <SwiperSlide key={b.id}>
                 <div className="flex items-center justify-center p-4 bg-white rounded-lg border border-[#e5e5e5] h-24">

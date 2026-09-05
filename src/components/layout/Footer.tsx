@@ -12,6 +12,12 @@ export function Footer() {
   const settings = useCmsSettings();
   const { lang } = useLang();
   const companyName = lang === "zh" ? CNAME.zh : CNAME.en;
+  const socialLinks = [
+    { icon: "facebook-f", href: settings.facebook_url, label: "Facebook" },
+    { icon: "x-twitter", href: settings.twitter_url, label: "X" },
+    { icon: "instagram", href: settings.instagram_url, label: "Instagram" },
+    { icon: "youtube", href: settings.youtube_url, label: "YouTube" },
+  ].filter((item) => item.href && item.href !== "#");
 
   const quickLinks = [
     { label: t("nav_home", lang), href: "/" },
@@ -31,17 +37,17 @@ export function Footer() {
               <Image src={(settings.logo_url || "/images/logo.png") + "?v=2"} alt={companyName} width={180} height={48} className="mb-5" unoptimized />
               <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
                 {lang === "zh"
-                  ? "专业草坪护理与园艺设备供应商，致力于为客户提供高品质的产品和卓越的服务。"
-                  : "Professional lawn care and garden equipment supplier, committed to high-quality products and excellent service."}
+                  ? "专注于微耕机、汽油机水泵等小型农业机械，为客户提供可靠产品、选型支持与售后服务。"
+                  : "Compact agricultural equipment supplier specializing in micro tillers and gasoline water pumps, with dependable product and after-sales support."}
               </p>
             </div>
-            <div className="flex gap-3 mt-8">
-              {[{ icon: "facebook-f", href: settings.facebook_url }, { icon: "x-twitter", href: settings.twitter_url }, { icon: "instagram", href: settings.instagram_url }, { icon: "youtube", href: settings.youtube_url }].map((s) => (
-                <a key={s.icon} href={s.href} className="w-9 h-9 rounded-full border border-gray-600 flex items-center justify-center text-gray-400 hover:text-white hover:border-white transition-colors text-sm">
-                  <i className={`fab fa-${s.icon}`}></i>
+            {socialLinks.length > 0 && <div className="flex gap-3 mt-8">
+              {socialLinks.map((item) => (
+                <a key={item.icon} href={item.href} target="_blank" rel="noreferrer" aria-label={item.label} className="w-9 h-9 rounded-full border border-gray-600 flex items-center justify-center text-gray-400 hover:text-white hover:border-white transition-colors text-sm">
+                  <i className={`fab fa-${item.icon}`}></i>
                 </a>
               ))}
-            </div>
+            </div>}
           </div>
 
           {/* Column 2: Contact */}
@@ -58,13 +64,13 @@ export function Footer() {
                 <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "rgba(156,194,17,0.15)", color: "#9cc211" }}>
                   <i className="fas fa-phone text-sm"></i>
                 </div>
-                <span className="text-gray-400 text-sm">{settings.phone}</span>
+                <a href={`tel:${settings.phone}`} className="text-gray-400 hover:text-white text-sm">{settings.phone}</a>
               </li>
               <li className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "rgba(156,194,17,0.15)", color: "#9cc211" }}>
                   <i className="fas fa-envelope text-sm"></i>
                 </div>
-                <span className="text-gray-400 text-sm">{settings.email}</span>
+                <a href={`mailto:${settings.email}`} className="text-gray-400 hover:text-white text-sm break-all">{settings.email}</a>
               </li>
               <li className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "rgba(156,194,17,0.15)", color: "#9cc211" }}>

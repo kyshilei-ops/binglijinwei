@@ -1,28 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { useCmsProducts } from "@/lib/supabaseData";
+import { useCmsProducts, useCmsSettings } from "@/lib/supabaseData";
 import { useLang } from "@/lib/LanguageContext";
 import { t } from "@/lib/i18n";
 import { ResolvedImage } from "@/components/ui/ResolvedImage";
+import { LocalizedPageMetadata } from "@/components/ui/LocalizedPageMetadata";
+import { localizedProductBadge, localizedProductCategory } from "@/lib/contentLocalization";
 import Link from "next/link";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const { lang } = useLang();
   const products = useCmsProducts();
+  const settings = useCmsSettings();
   const product = products.find((p) => p.id === Number(id));
   const [selectedImg, setSelectedImg] = useState(0);
-  // Reset selected image when product changes
-  useEffect(() => { setSelectedImg(0); }, [id]);
-
   if (!product) {
     return (
       <>
         <Header />
+        <LocalizedPageMetadata titleZh="产品" titleEn="Products" />
         <main className="flex-1 flex items-center justify-center py-40">
           <div className="text-center">
             <h1 className="text-3xl font-bold text-gray-800 mb-4">{t("prod_not_found", lang)}</h1>
@@ -36,22 +37,29 @@ export default function ProductDetailPage() {
 
   // Parse gallery images
   let galleryImages: string[] = [];
-  try { galleryImages = JSON.parse((product as any).images || "[]"); } catch { galleryImages = []; }
+  try { galleryImages = JSON.parse(product.images || "[]"); } catch { galleryImages = []; }
   // Main image is the first gallery image or the single image_url
   const allImages = galleryImages.length > 0
     ? galleryImages
     : [product.image_url].filter(Boolean);
   // Bilingual display
-  const pName = lang === "zh" ? product.name : ((product as any).name_en || product.name);
-  const pCategory = lang === "zh" ? product.category : ((product as any).category_en || product.category);
-  const pDesc = lang === "zh" ? (product.description || "") : ((product as any).description_en || product.description || "");
+  const pName = lang === "zh" ? product.name : (product.name_en || product.name);
+  const pCategory = localizedProductCategory(product.category, product.category_en, lang);
+  const pBadge = localizedProductBadge(product.badge, lang);
+  const pDesc = lang === "zh" ? (product.description || "") : (product.description_en || product.description || "");
   const descLines = pDesc.split("\n").filter((l: string) => l.trim().length > 0);
   const hasDesc = descLines.length > 0;
 
   return (
     <>
       <Header />
-      <main className="flex-1">
+      <LocalizedPageMetadata
+        titleZh={product.name}
+        titleEn={product.name_en || product.name}
+        descriptionZh={product.description || `${product.name}产品信息与参数。`}
+        descriptionEn={product.description_en || `${product.name_en || product.name} product information and specifications.`}
+      />
+      <main className="flex-1 pb-20 md:pb-0">
         <section className="py-12">
           <div className="container">
             {/* Breadcrumb */}
@@ -68,9 +76,9 @@ export default function ProductDetailPage() {
               <div>
                 {/* Main image */}
                 <div className="relative h-80 md:h-[400px] bg-gray-50 rounded-lg overflow-hidden mb-3">
-                  <ResolvedImage src={allImages[selectedImg]} alt={pName} fill className="object-contain" />
-                  {product.badge && (
-                    <span className="absolute top-4 left-4 bg-red-500 text-white text-sm px-3 py-1 rounded">{product.badge}</span>
+                  <ResolvedImage src={allImages[selectedImg] || allImages[0]} alt={pName} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-contain" />
+                  {pBadge && (
+                    <span className="absolute top-4 left-4 bg-[#4caf50] text-white text-sm px-3 py-1 rounded">{pBadge}</span>
                   )}
                 </div>
 
@@ -85,7 +93,7 @@ export default function ProductDetailPage() {
                           i === selectedImg ? "border-[#4caf50]" : "border-gray-200 hover:border-gray-400"
                         }`}
                       >
-                        <ResolvedImage src={img} alt={`${i + 1}`} fill className="object-contain" />
+                        <ResolvedImage src={img} alt={`${pName} ${i + 1}`} fill sizes="64px" className="object-contain" />
                       </button>
                     ))}
                   </div>
@@ -107,7 +115,7 @@ export default function ProductDetailPage() {
 
                 {/* Inquiry button */}
                 <div className="mb-8">
-                  <Link href="/contact" className="inline-flex items-center px-8 py-3 bg-[#4caf50] hover:bg-[#388e3c] text-white font-medium rounded-md transition-colors">
+                  <Link href={`/contact?product=${encodeURIComponent(pName)}`} className="inline-flex items-center px-8 py-3 bg-[#4caf50] hover:bg-[#388e3c] text-white font-medium rounded-md transition-colors">
                     <i className="fas fa-envelope mr-2"></i>{t("prod_inquiry", lang)}
                   </Link>
                 </div>
@@ -146,11 +154,11 @@ export default function ProductDetailPage() {
                 {products.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4).map((p) => (
                   <Link key={p.id} href={`/products/${p.id}`} className="group bg-white border border-[#e5e5e5] rounded-lg overflow-hidden hover:shadow-lg transition-all">
                     <div className="relative h-48 bg-gray-50 overflow-hidden">
-                      <ResolvedImage src={p.image_url} alt={p.name} fill className="object-contain group-hover:scale-105 transition-transform duration-300" />
+                      <ResolvedImage src={p.image_url} alt={lang === "zh" ? p.name : (p.name_en || p.name)} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-contain group-hover:scale-105 transition-transform duration-300" />
                     </div>
                     <div className="p-4">
-                      <h3 className="text-sm font-medium text-[#1a202c] group-hover:text-[#4caf50] transition-colors">{p.name}</h3>
-                      <span className="text-[#4caf50] font-semibold">${p.price.toFixed(2)}</span>
+                      <h3 className="text-sm font-medium text-[#1a202c] group-hover:text-[#4caf50] transition-colors">{lang === "zh" ? p.name : (p.name_en || p.name)}</h3>
+                      {p.price > 0 && <span className="text-[#4caf50] font-semibold">${p.price.toFixed(2)}</span>}
                     </div>
                   </Link>
                 ))}
@@ -160,6 +168,16 @@ export default function ProductDetailPage() {
         )}
       </main>
       <Footer />
+      <div className={`md:hidden fixed inset-x-0 bottom-0 z-50 grid ${settings.phone ? "grid-cols-2" : "grid-cols-1"} gap-2 border-t border-gray-200 bg-white p-3 shadow-[0_-4px_18px_rgba(0,0,0,0.12)]`}>
+        {settings.phone ? (
+          <a href={`tel:${settings.phone}`} className="flex items-center justify-center gap-2 rounded-md border border-[#9cc211] px-3 py-3 font-medium text-[#557000]">
+            <i className="fas fa-phone"></i>{lang === "zh" ? "电话咨询" : "Call Us"}
+          </a>
+        ) : null}
+        <Link href={`/contact?product=${encodeURIComponent(pName)}`} className="flex items-center justify-center gap-2 rounded-md bg-[#4caf50] px-3 py-3 font-medium text-white">
+          <i className="fas fa-envelope"></i>{t("prod_inquiry", lang)}
+        </Link>
+      </div>
     </>
   );
 }

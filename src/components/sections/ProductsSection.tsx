@@ -6,40 +6,28 @@ import { ResolvedImage } from "@/components/ui/ResolvedImage";
 import { useLang } from "@/lib/LanguageContext";
 import { t } from "@/lib/i18n";
 import { useCmsProducts } from "@/lib/supabaseData";
+import { localizedProductBadge } from "@/lib/contentLocalization";
 
-function ProductCard({ product }: { product: { id: number; name: string; name_en: string; image_url: string; price: string; old_price: string | null; badge: string | null } }) {
+function ProductCard({ product }: { product: { id: number; name: string; name_en: string; image_url: string; price: number; old_price: number | null; badge: string | null } }) {
   const { lang } = useLang();
   const displayName = lang === "zh" ? product.name : (product.name_en || product.name);
-  const safePrice = (val: string) => {
-    try {
-      const n = parseFloat(val.replace("$", ""));
-      return isNaN(n) ? "0.00" : n.toFixed(2);
-    } catch { return "0.00"; }
-  };
+  const displayBadge = localizedProductBadge(product.badge, lang);
   return (
     <div className="group bg-white border border-[#e5e5e5] rounded-lg overflow-hidden hover:shadow-lg transition-all">
-      <div className="relative aspect-square bg-gray-50 overflow-hidden">
-        <ResolvedImage src={product.image_url} alt={displayName || "Product"} fill className="object-contain group-hover:scale-105 transition-transform duration-300" />
-        {product.badge && (
-          <span className={`absolute top-3 left-3 text-xs font-medium text-white px-2 py-1 rounded ${product.badge === "Sale" ? "bg-red-500" : product.badge === "Hot" ? "bg-orange-500" : "bg-blue-500"}`}>{product.badge}</span>
+      <Link href={`/products/${product.id}`} className="relative block aspect-square bg-gray-50 overflow-hidden">
+        <ResolvedImage src={product.image_url} alt={displayName || "Product"} fill sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw" className="object-contain group-hover:scale-105 transition-transform duration-300" />
+        {displayBadge && (
+          <span className="absolute top-3 left-3 text-xs font-medium text-white px-2 py-1 rounded bg-[#4caf50]">{displayBadge}</span>
         )}
-        <div className="absolute inset-x-0 bottom-0 flex justify-center gap-2 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-          <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-[#4a5568] hover:bg-[#4caf50] hover:text-white shadow-md transition-colors" title={t("quick_view", lang)}><i className="far fa-eye"></i></button>
-          <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-[#4a5568] hover:bg-[#4caf50] hover:text-white shadow-md transition-colors" title={t("add_to_wishlist", lang)}><i className="far fa-heart"></i></button>
-          <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-[#4a5568] hover:bg-[#4caf50] hover:text-white shadow-md transition-colors" title={t("compare", lang)}><i className="fas fa-exchange-alt"></i></button>
-        </div>
-      </div>
+      </Link>
       <div className="p-5">
         <h3 className="text-sm font-medium text-[#1a202c] mb-2 group-hover:text-[#4caf50] transition-colors line-clamp-2"><Link href={`/products/${product.id}`}>{displayName}</Link></h3>
-        {product.price !== "$0.00" && (
+        {product.price > 0 && (
           <div className="flex items-center gap-2">
-            <span className="text-lg font-semibold text-[#9cc211]">{product.price}</span>
-            {product.old_price && <span className="text-sm text-gray-400 line-through">{product.old_price}</span>}
+            <span className="text-lg font-semibold text-[#9cc211]">${product.price.toFixed(2)}</span>
+            {product.old_price && <span className="text-sm text-gray-400 line-through">${product.old_price.toFixed(2)}</span>}
           </div>
         )}
-        <div className="flex items-center gap-0.5 mt-2 text-yellow-400 text-xs">
-          {Array.from({ length: 5 }).map((_, i) => <i key={i} className="fas fa-star"></i>)}
-        </div>
       </div>
     </div>
   );
@@ -54,7 +42,7 @@ export function ProductsSection() {
   const categoryPairs = useMemo(() => {
     const map = new Map<string, string>(); // zhKey -> displayName
     products.forEach((p) => {
-      if (p.category) map.set(p.category, lang === "zh" ? p.category : ((p as any).category_en || p.category));
+      if (p.category) map.set(p.category, lang === "zh" ? p.category : (p.category_en || p.category));
     });
     return [...map.entries()]; // [[zhKey, display], ...]
   }, [products, lang]);
@@ -88,10 +76,10 @@ export function ProductsSection() {
             <ProductCard key={p.id} product={{
               id: p.id,
               name: p.name,
-              name_en: (p as any).name_en || "",
+              name_en: p.name_en || "",
               image_url: p.image_url,
-              price: `$${p.price.toFixed(2)}`,
-              old_price: p.old_price ? `$${p.old_price.toFixed(2)}` : null,
+              price: p.price,
+              old_price: p.old_price,
               badge: p.badge || null,
             }} />
           ))}

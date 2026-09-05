@@ -33,7 +33,7 @@ export function ServiceFeatures() {
   ];
 
   return (
-    <section className="py-0 -mt-20 relative z-10">
+    <section className="pt-6 pb-0 sm:pt-0 sm:-mt-16 lg:-mt-20 relative z-10">
       <div className="container">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {services.map((s, i) => (
@@ -67,7 +67,7 @@ export function CategoriesSection() {
           count: 1,
           image: p.image_url || "/images/misc/cms-1.jpg",
           nameZh: p.category,
-          nameEn: (p as any).category_en || p.category,
+          nameEn: p.category_en || p.category,
         });
       }
     });
@@ -91,9 +91,9 @@ export function CategoriesSection() {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {categories.map((cat) => (
-            <Link key={cat.name} href={`/products?category=${encodeURIComponent(cat.name)}`} className="group relative rounded-lg overflow-hidden border border-[#e5e5e5] hover:shadow-lg transition-all">
+            <Link key={cat.key} href={`/products?category=${encodeURIComponent(cat.key)}`} className="group relative rounded-lg overflow-hidden border border-[#e5e5e5] hover:shadow-lg transition-all">
               <div className="relative h-48">
-                <ResolvedImage src={cat.image} alt={cat.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                <ResolvedImage src={cat.image} alt={cat.name} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-300" />
                 <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
                   <h3 className="text-xl font-semibold mb-1">{cat.name}</h3>

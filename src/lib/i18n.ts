@@ -103,11 +103,11 @@ export const translations = {
   product_8_name: { en: "Hedge Trimmer Electric", zh: "电动修枝剪" },
 
   // Countdown
-  countdown_subtitle: { en: "Limited Time Offer", zh: "限时优惠" },
-  countdown_title: { en: "Mega Sale - Up to", zh: "超级大促 - 最高" },
-  countdown_highlight: { en: "50% Off", zh: "五折优惠" },
-  countdown_desc: { en: "Don't miss out on amazing deals on lawn mowers and garden equipment!", zh: "不要错过割草机和园艺设备的超值优惠！" },
-  countdown_btn: { en: "Shop Now", zh: "立即抢购" },
+  countdown_subtitle: { en: "Equipment Selection", zh: "设备选购" },
+  countdown_title: { en: "Find the Right Equipment for", zh: "找到适合您作业需求的" },
+  countdown_highlight: { en: "Your Work", zh: "可靠设备" },
+  countdown_desc: { en: "Explore micro tillers and gasoline water pumps, or contact us for product selection and quotation support.", zh: "浏览微耕机、汽油机水泵等产品，也可以联系我们获取选型建议与报价支持。" },
+  countdown_btn: { en: "View All Products", zh: "查看全部产品" },
   countdown_days: { en: "Days", zh: "天" },
   countdown_hours: { en: "Hours", zh: "时" },
   countdown_mins: { en: "Minutes", zh: "分" },
@@ -145,12 +145,12 @@ export const translations = {
   blog_3_cat: { en: "Equipment", zh: "设备" },
 
   // Newsletter
-  newsletter_subtitle: { en: "Newsletter", zh: "订阅资讯" },
-  newsletter_title: { en: "Subscribe & Get", zh: "订阅即可获得" },
-  newsletter_highlight: { en: "10% Off", zh: "九折优惠" },
-  newsletter_desc: { en: "Subscribe to our newsletter and get 10% off your first order. Stay updated with the latest products and offers.", zh: "订阅我们的资讯邮件，首次下单即享9折优惠。获取最新产品和优惠信息。" },
+  newsletter_subtitle: { en: "Product Support", zh: "产品支持" },
+  newsletter_title: { en: "Need Product", zh: "需要产品" },
+  newsletter_highlight: { en: "Information?", zh: "资料或报价？" },
+  newsletter_desc: { en: "Tell us about your working conditions and requirements. We will help you compare models, specifications and suitable options.", zh: "告诉我们您的作业环境和具体需求，我们将协助您比较型号、参数与适用方案。" },
   newsletter_placeholder: { en: "Your email address", zh: "您的邮箱地址" },
-  newsletter_btn: { en: "Subscribe", zh: "订阅" },
+  newsletter_btn: { en: "Contact Us", zh: "联系我们" },
   newsletter_success_title: { en: "Thank you for subscribing!", zh: "感谢您的订阅！" },
   newsletter_success_desc: { en: "Check your email for your discount code.", zh: "请查看您的邮箱获取折扣码。" },
 
@@ -188,7 +188,7 @@ export const translations = {
   admin_login_hint: { en: "Default password: admin123", zh: "默认密码：admin123" },
 
   // Layout
-  admin_cms_title: { en: "LawnMover CMS", zh: "LawnMover 后台管理" },
+  admin_cms_title: { en: "Binglijinwei CMS", zh: "秉立锦为后台管理" },
   admin_cms_subtitle: { en: "Content Management", zh: "内容管理系统" },
   admin_panel: { en: "Admin Panel", zh: "管理面板" },
   admin_logout: { en: "Logout", zh: "退出登录" },
