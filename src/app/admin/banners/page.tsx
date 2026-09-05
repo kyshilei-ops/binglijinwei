@@ -66,18 +66,6 @@ export default function BannersPage() {
 
   if (loading) return <p>加载中…</p>;
 
-  const fields = [
-    { label: t("admin_title_field", lang), key: "title" },
-    { label: t("ban_subtitle", lang), key: "subtitle" },
-    { label: t("ban_highlight", lang), key: "highlight" },
-    { label: t("ban_description", lang), key: "description" },
-    { label: t("admin_image_url", lang), key: "image_url" },
-    { label: "英文标题", key: "title_en" },
-    { label: "英文副标题", key: "subtitle_en" },
-    { label: "英文强调文字", key: "highlight_en" },
-    { label: "英文描述", key: "description_en" },
-  ];
-
   return (
     <div>
       {!editing && error && <p role="alert" className="text-red-600 mb-4">{error}</p>}
@@ -93,23 +81,12 @@ export default function BannersPage() {
             <h2 className="text-lg font-semibold mb-4">{editing.id ? t("ban_edit", lang) : t("ban_add", lang)}</h2>
             <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save(editing); }}>
               {error && <p role="alert" className="text-red-600">{error}</p>}
-              {fields.map((f) => (
-                <div key={f.key}>
-                  {f.key === "image_url" ? (
                     <SingleImageUploader
-                      value={(editing as any).image_url || ""}
+                      value={editing.image_url || ""}
                       onChange={(url) => setEditing(current => current ? { ...current, image_url: url } : current)}
                       onUploadingChange={setUploading}
-                      label={f.label}
+                      label={lang === "zh" ? "横幅图片" : "Banner image"}
                     />
-                  ) : (
-                    <>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">{f.label}</label>
-                      <input type="text" value={(editing as any)[f.key] || ""} onChange={(e) => setEditing({ ...editing, [f.key]: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-green-500 outline-none" />
-                    </>
-                  )}
-                </div>
-              ))}
               <p className="text-xs text-gray-500">图片建议 1920 × 700 像素，JPG、PNG 或 WebP，不超过 5MB。按钮固定为“查看产品”和“联系我们”。</p>
               <label className="block text-sm">排序（数字越小越靠前）<input type="number" value={editing.sort_order} onChange={e => setEditing({ ...editing, sort_order: Number(e.target.value) || 0 })} className="border rounded p-2 ml-2 w-24" /></label>
               <label className="flex gap-2 text-sm"><input type="checkbox" checked={editing.is_active} onChange={e => setEditing({ ...editing, is_active: e.target.checked })} />在首页显示</label>
@@ -126,7 +103,6 @@ export default function BannersPage() {
           <thead className="bg-gray-50">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-gray-600">{t("admin_order", lang)}</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">{t("admin_title_field", lang)}</th>
               <th className="text-left px-4 py-3 font-medium text-gray-600">{t("admin_image", lang)}</th>
               <th className="text-left px-4 py-3 font-medium text-gray-600">{t("admin_status", lang)}</th>
               <th className="text-right px-4 py-3 font-medium text-gray-600">{t("admin_actions", lang)}</th>
@@ -136,8 +112,10 @@ export default function BannersPage() {
             {banners.map((b) => (
               <tr key={b.id} className="border-t border-gray-100">
                 <td className="px-4 py-3">{b.sort_order}</td>
-                <td className="px-4 py-3 font-medium text-gray-800">{b.title}</td>
-                <td className="px-4 py-3 text-xs text-gray-400 truncate max-w-[200px]">{b.image_url}</td>
+                <td className="px-4 py-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={b.image_url || undefined} alt={lang === "zh" ? `横幅 ${b.id}` : `Banner ${b.id}`} className="w-48 h-20 object-contain bg-gray-50 rounded" />
+                </td>
                 <td className="px-4 py-3"><button onClick={() => toggle(b.id)} className={`text-xs px-2 py-1 rounded ${b.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-400"}`}>{b.is_active ? t("admin_active", lang) : t("admin_inactive", lang)}</button></td>
                 <td className="px-4 py-3 text-right">
                   <button onClick={() => setEditing(b)} className="text-blue-500 hover:text-blue-700 mr-3"><i className="fas fa-edit"></i></button>
