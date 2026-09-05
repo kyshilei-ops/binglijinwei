@@ -568,9 +568,41 @@ body {
   height: auto;
 }
 
-.hero-banner-content {
-  background: #102e19;
-  padding: 28px 0 42px;
+.hero-banner-actions {
+  position: absolute;
+  bottom: clamp(26px, 3vw, 52px);
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hero-banner-action {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 6px;
+  color: white;
+  background: rgba(16, 46, 25, 0.35);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
+  font-size: clamp(12px, 1.1vw, 16px);
+  font-weight: 600;
+  transition: background 180ms ease;
+}
+
+.hero-banner-action-primary { background: rgba(125, 160, 14, 0.45); }
+.hero-banner-action:hover { background: rgba(16, 46, 25, 0.65); }
+.hero-banner-action-primary:hover { background: rgba(125, 160, 14, 0.75); }
+.hero-banner-action:focus-visible { outline: 2px solid white; outline-offset: 3px; }
+@media (max-width: 639px) {
+  .hero-banner-action { padding: 6px 14px; }
+  .hero-banner-actions { gap: 8px; }
 }
 
 @media (max-width: 639px) {
